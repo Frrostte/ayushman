@@ -3,6 +3,68 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const Appointment = require('../models/Appointment');
 const roleCheck = require('../middleware/roleCheck');
+const User = require('../models/User');
+
+// @route   GET api/appointments/slots
+// @desc    Get available slots for a doctor on a specific date
+// @access  Private
+router.get('/slots', auth, async (req, res) => {
+    const { doctorId, date } = req.query; // date in YYYY-MM-DD format
+
+    try {
+        const doctor = await User.findById(doctorId);
+        if (!doctor || doctor.role !== 'doctor') {
+            return res.status(404).json({ msg: 'Doctor not found' });
+        }
+
+        if (!doctor.availability || doctor.availability.length === 0) {
+            return res.json([]);
+        }
+
+        // Find availability for the specific date
+        const availability = doctor.availability.find(
+            a => new Date(a.date).toISOString().split('T')[0] === new Date(date).toISOString().split('T')[0]
+        );
+
+        if (!availability) {
+            return res.json([]);
+        }
+
+        const { startTime, endTime } = availability;
+        const slots = [];
+        let currentTime = new Date(`${date}T${startTime}`);
+        const endDateTime = new Date(`${date}T${endTime}`);
+
+        // Generate all 30-min slots
+        while (currentTime < endDateTime) {
+            const timeString = currentTime.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+            slots.push(timeString);
+            currentTime.setMinutes(currentTime.getMinutes() + 30);
+        }
+
+        // Fetch existing appointments
+        // Note: Database stores date as Date object, so we need to match the day
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const appointments = await Appointment.find({
+            doctorId,
+            date: { $gte: startOfDay, $lte: endOfDay },
+            status: { $ne: 'cancelled' }
+        });
+
+        const bookedTimes = appointments.map(app => app.time);
+        const availableSlots = slots.filter(slot => !bookedTimes.includes(slot));
+
+        res.json(availableSlots);
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
 
 // @route   GET api/appointments
 // @desc    Get all appointments
@@ -91,6 +153,18 @@ router.post('/', auth, async (req, res) => {
             date,
             time
         });
+
+        // Check for existing appointment
+        const existingAppointment = await Appointment.findOne({
+            doctorId,
+            date,
+            time,
+            status: { $ne: 'cancelled' }
+        });
+
+        if (existingAppointment) {
+            return res.status(400).json({ msg: 'This slot is already booked' });
+        }
 
         const appointment = await newAppointment.save();
         res.json(appointment);

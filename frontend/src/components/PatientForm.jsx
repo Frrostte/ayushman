@@ -5,33 +5,9 @@ import api from '../lib/api';
 
 export default function PatientForm({ onSuccess, initialData = null }) {
     const [formData, setFormData] = useState({
-        name: initialData?.userId?.name || '', // Name is in User, but for create it's different. Wait, to create patient we need User first?
-        // The prompt says "Doctor can add a new patient".
-        // Does "Add Patient" create a User account?
-        // "1. User (Doctors + Patients in one table)"
-        // "Patient schema: userId: ObjectId ref User"
-        // So creating a patient implies creating a User first.
-        // The simplified prompt didn't specify separate User creation for Patient.
-        // "Doctor can add a new patient -> fills form -> patient created"
-        // So the form should probably create both User and Patient or the backend handle it.
-        // The backend `POST /api/patients` expects `userId`.
-        // This means the User must exist.
-        // But the Doctor adds a NEW patient.
-        // So I need to register a User (role=patient) then create Patient record.
-        // Or the backend `POST /api/patients` should handle creating the User?
-        // The backend `patients.js` I wrote just does `new Patient({...})`. It expects `userId` in body.
-        // So I need to create a User first in the frontend flow?
-        // Or I should have updated backend to handle this.
-        // But "Add and manage patients" usually means filling one form.
-        // I'll update the frontend to:
-        // 1. Call `register` to create User.
-        // 2. Call `createPatient` with new userId.
-
-        // So the form needs fields for User (email, name, phone, password?) and Patient (dob, gender, etc).
-        // I'll generate a dummy password or ask for it.
-        email: initialData?.userId?.email || '',
-        password: '', // Default password for patients? Or ask? I'll ask.
         name: initialData?.userId?.name || '',
+        email: initialData?.userId?.email || '',
+        password: '',
         phone: initialData?.userId?.phone || '',
         dateOfBirth: initialData?.dateOfBirth ? new Date(initialData.dateOfBirth).toISOString().split('T')[0] : '',
         gender: initialData?.gender || 'other',
@@ -55,8 +31,6 @@ export default function PatientForm({ onSuccess, initialData = null }) {
             let userId = initialData?.userId?._id;
 
             if (!initialData) {
-                // Create User first
-                // Check if user exists? Register endpoint handles that.
                 const userRes = await api.post('/auth/register', {
                     email: formData.email,
                     password: formData.password,
@@ -64,12 +38,10 @@ export default function PatientForm({ onSuccess, initialData = null }) {
                     phone: formData.phone,
                     role: 'patient'
                 });
-                userId = userRes.data.user.id; // user object from response? My auth.js returns { token, user: { id... } }
+                userId = userRes.data.user.id;
             }
 
-            // Create or Update Patient
             if (initialData) {
-                // Update
                 await api.put(`/patients/${initialData._id}`, {
                     dateOfBirth: formData.dateOfBirth,
                     gender: formData.gender,
@@ -77,7 +49,6 @@ export default function PatientForm({ onSuccess, initialData = null }) {
                     medicalNotes: formData.medicalNotes
                 });
             } else {
-                // Create
                 await api.post('/patients', {
                     userId,
                     dateOfBirth: formData.dateOfBirth,
@@ -96,65 +67,78 @@ export default function PatientForm({ onSuccess, initialData = null }) {
         }
     };
 
+    const inputClasses = "appearance-none rounded-lg relative block w-full px-3 py-3 bg-black/50 border border-white/10 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition-all";
+    const labelClasses = "block text-sm font-medium text-gray-400 mb-1";
+
     return (
-        <form onSubmit={handleSubmit}>
-            {error && <div className="error-msg">{error}</div>}
+        <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+                <div className="bg-red-500/10 border border-red-500/50 text-red-500 px-4 py-3 rounded-lg text-sm text-center">
+                    {error}
+                </div>
+            )}
 
             {!initialData && (
                 <>
-                    <div className="form-group">
-                        <label>Name</label>
-                        <input type="text" name="name" value={formData.name} onChange={handleChange} required />
+                    <div>
+                        <label className={labelClasses}>Name</label>
+                        <input type="text" name="name" value={formData.name} onChange={handleChange} required className={inputClasses} placeholder="Patient Name" />
                     </div>
-                    <div className="form-group">
-                        <label>Email</label>
-                        <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+                    <div>
+                        <label className={labelClasses}>Email</label>
+                        <input type="email" name="email" value={formData.email} onChange={handleChange} required className={inputClasses} placeholder="Email" />
                     </div>
-                    <div className="form-group">
-                        <label>Phone</label>
-                        <input type="text" name="phone" value={formData.phone} onChange={handleChange} required />
+                    <div>
+                        <label className={labelClasses}>Phone</label>
+                        <input type="text" name="phone" value={formData.phone} onChange={handleChange} required className={inputClasses} placeholder="Phone" />
                     </div>
-                    <div className="form-group">
-                        <label>Password (for patient login)</label>
-                        <input type="text" name="password" value={formData.password} onChange={handleChange} required />
+                    <div>
+                        <label className={labelClasses}>Password (for patient login)</label>
+                        <input type="text" name="password" value={formData.password} onChange={handleChange} required className={inputClasses} placeholder="Temporary Password" />
                     </div>
                 </>
             )}
 
             {initialData && (
-                <div className="form-group">
-                    <label>Name (Read Only)</label>
-                    <input type="text" value={formData.name} disabled />
+                <div>
+                    <label className={labelClasses}>Name (Read Only)</label>
+                    <input type="text" value={formData.name} disabled className={`${inputClasses} opacity-50 cursor-not-allowed`} />
                 </div>
             )}
 
-            <div className="form-group">
-                <label>Date of Birth</label>
-                <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} />
+            <div>
+                <label className={labelClasses}>Date of Birth</label>
+                <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className={inputClasses} />
             </div>
 
-            <div className="form-group">
-                <label>Gender</label>
-                <select name="gender" value={formData.gender} onChange={handleChange}>
+            <div>
+                <label className={labelClasses}>Gender</label>
+                <select name="gender" value={formData.gender} onChange={handleChange} className={inputClasses}>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                     <option value="other">Other</option>
                 </select>
             </div>
 
-            <div className="form-group">
-                <label>Address</label>
-                <textarea name="address" value={formData.address} onChange={handleChange} />
+            <div>
+                <label className={labelClasses}>Address</label>
+                <textarea name="address" value={formData.address} onChange={handleChange} className={inputClasses} rows="3" placeholder="Address"></textarea>
             </div>
 
-            <div className="form-group">
-                <label>Medical Notes</label>
-                <textarea name="medicalNotes" value={formData.medicalNotes} onChange={handleChange} />
+            <div>
+                <label className={labelClasses}>Medical Notes</label>
+                <textarea name="medicalNotes" value={formData.medicalNotes} onChange={handleChange} className={inputClasses} rows="3" placeholder="Notes"></textarea>
             </div>
 
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? 'Saving...' : (initialData ? 'Update Patient' : 'Add Patient')}
-            </button>
+            <div className="pt-4">
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className={`w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white ${loading ? 'bg-primary/50' : 'bg-primary hover:bg-primary-dark'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:ring-offset-black transition-all duration-300 shadow-[0_0_20px_-5px_rgba(124,58,237,0.5)]`}
+                >
+                    {loading ? 'Saving...' : (initialData ? 'Update Patient' : 'Add Patient')}
+                </button>
+            </div>
         </form>
     );
 }

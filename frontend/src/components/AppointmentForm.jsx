@@ -25,7 +25,7 @@ export default function AppointmentForm({ onSuccess, patients, doctors }) {
 
     // Local state for lists if not passed
     const [localPatients, setLocalPatients] = useState(patients || []);
-    const [localDoctors, setLocalDoctors] = useState(doctors || []);
+    // const [localDoctors, setLocalDoctors] = useState(doctors || []); // Removed as per instruction
 
     useEffect(() => {
         const fetchData = async () => {
@@ -72,16 +72,23 @@ export default function AppointmentForm({ onSuccess, patients, doctors }) {
         }
     };
 
-    return (
-        <form onSubmit={handleSubmit}>
-            {error && <div className="error-msg">{error}</div>}
+    const inputClasses = "appearance-none rounded-lg relative block w-full px-3 py-3 bg-black/50 border border-white/10 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition-all";
+    const labelClasses = "block text-sm font-medium text-gray-400 mb-1";
 
-            <div className="form-group">
-                <label>Patient</label>
-                <select name="patientId" value={formData.patientId} onChange={handleChange} required>
-                    <option value="">Select Patient</option>
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+                <div className="bg-red-500/10 border border-red-500/50 text-red-500 px-4 py-3 rounded-lg text-sm text-center">
+                    {error}
+                </div>
+            )}
+
+            <div>
+                <label className={labelClasses}>Patient</label>
+                <select name="patientId" value={formData.patientId} onChange={handleChange} required className={inputClasses}>
+                    <option value="" className="bg-black">Select Patient</option>
                     {localPatients.map(p => (
-                        <option key={p._id} value={p._id}>
+                        <option key={p._id} value={p._id} className="bg-black">
                             {p.userId?.name} (DOB: {p.dateOfBirth ? new Date(p.dateOfBirth).toLocaleDateString() : 'N/A'})
                         </option>
                     ))}
@@ -95,19 +102,25 @@ export default function AppointmentForm({ onSuccess, patients, doctors }) {
         <select name="doctorId" ... > ... </select> 
       </div> */}
 
-            <div className="form-group">
-                <label>Date</label>
-                <input type="date" name="date" value={formData.date} onChange={handleChange} required />
+            <div>
+                <label className={labelClasses}>Date</label>
+                <input type="date" name="date" value={formData.date} onChange={handleChange} required className={inputClasses} />
             </div>
 
-            <div className="form-group">
-                <label>Time</label>
-                <input type="time" name="time" value={formData.time} onChange={handleChange} required />
+            <div>
+                <label className={labelClasses}>Time</label>
+                <input type="time" name="time" value={formData.time} onChange={handleChange} required className={inputClasses} />
             </div>
 
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? 'Booking...' : 'Book Appointment'}
-            </button>
+            <div className="pt-4">
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className={`w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white ${loading ? 'bg-primary/50' : 'bg-primary hover:bg-primary-dark'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:ring-offset-black transition-all duration-300 shadow-[0_0_20px_-5px_rgba(124,58,237,0.5)]`}
+                >
+                    {loading ? 'Booking...' : 'Book Appointment'}
+                </button>
+            </div>
         </form>
     );
 }

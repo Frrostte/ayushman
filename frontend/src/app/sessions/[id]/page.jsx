@@ -6,73 +6,14 @@ import SessionForm from '../../../components/SessionForm';
 import api from '../../../lib/api';
 
 export default function SessionPage({ params }) {
-    const { id } = params; // This is appointmentId based on my link in Appointments page
-    const [appointment, setAppointment] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [existingSession, setExistingSession] = useState(null);
-
-    useEffect(() => {
-        const fetchContext = async () => {
-            try {
-                setLoading(true);
-                // 1. Check if session already exists for this appointment?
-                // My backend doesn't have "get session by appointmentId".
-                // It has "get all sessions for patient" and "get session by id".
-                // Wait, I should have added that?
-                // But "Session schema: appointmentId ref Appointment".
-                // I can fetch all sessions for patient and find one with this appointmentId.
-                // OR better, I need to know if I'm "Creating" or "Viewing".
-                // The link /sessions/[id] passes appointment ID.
-                // Let's first fetch the Appointment details to know who the patient is.
-
-                // Is `id` an appointment ID or Session ID?
-                // If I clicked "Start Session" from Appointment, I passed Appointment ID.
-                // If I clicked "View Session" (completed), I passed Appointment ID? 
-                // PROMPT: "Click appointment to create session". 
-                // I'll assume `id` IS APPOINTMENT ID.
-
-                // Fetch Appointment
-                // But I don't have "GET /api/appointments/:id".
-                // I only added "GET /api/appointments", "GET /api/appointments/doctor/:id"...
-                // Oops. I missed "GET single appointment".
-                // Verify routes... "routes/appointments.js" -> GET /, GET /doctor/:id, GET /patient/:id, POST /, PUT /:id.
-                // I do NOT have GET /:id.
-                // I should add it or I can't fetch appointment details easily.
-                // BUT, I can pass data via state? No, refresh breaks it.
-                // I should add GET /api/appointments/:id to backend.
-                // OR, I can use "GET /api/sessions" and iterate? No.
-
-                // I will add GET /api/appointments/:id quickly.
-                // For now, I'll assume I can fetch it.
-
-                // Wait, I can try to find session by ID if `id` was session ID.
-                // But "Start Session" implies creating new.
-
-                // Plan:
-                // 1. Add GET /api/appointments/:id to backend. (Turbo fix).
-                // Update: I can't do turbo fix easily without modifying file.
-                // I'll modify `backend/routes/appointments.js` to add GET /:id.
-
-            } catch (e) {
-                console.error(e);
-            } finally {
-                setLoading(false);
-            }
-        };
-        // fetchContext();
-    }, [id]);
-
-    // Placeholder while I fix the route
-    return (
-        <SessionPageContent id={id} />
-    );
+    const { id } = params;
+    return <SessionPageContent id={id} />;
 }
 
 function SessionPageContent({ id }) {
     const [appointment, setAppointment] = useState(null);
     const [session, setSession] = useState(null);
     const [loading, setLoading] = useState(true);
-
     const [user, setUser] = useState(null);
 
     useEffect(() => {
@@ -81,17 +22,11 @@ function SessionPageContent({ id }) {
 
         const init = async () => {
             try {
-                // Fetch appointment logic requires endpoint.
-                // Assuming I add it.
                 const res = await api.get(`/appointments/${id}`);
                 setAppointment(res.data);
 
-                // Now check if session exists
-                // We don't have direct endpoint "get session by appointment".
-                // We can fetch patient sessions and filter.
                 if (res.data.patientId) {
                     const patSessionRes = await api.get(`/sessions/patient/${res.data.patientId._id || res.data.patientId}`);
-                    // Find session linked to this appointment
                     const found = patSessionRes.data.find(s => s.appointmentId === id || s.appointmentId?._id === id);
                     if (found) setSession(found);
                 }
@@ -104,46 +39,143 @@ function SessionPageContent({ id }) {
         init();
     }, [id]);
 
-    if (loading) return <div>Loading...</div>;
-    if (!appointment) return <div>Appointment not found (or endpoint missing)</div>;
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    if (!appointment) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center text-white">
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold mb-2">Appointment Not Found</h2>
+                    <p className="text-gray-400">The requested appointment could not be loaded.</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div>
+        <div className="min-h-screen bg-background text-white selection:bg-primary selection:text-white">
             <Navbar />
-            <div className="container">
-                <h1>Clinical Session</h1>
-                <div className="card" style={{ background: '#f8f9fa' }}>
-                    <p><strong>Patient:</strong> {appointment.patientId?.userId?.name}</p>
-                    <p><strong>Date:</strong> {new Date(appointment.date).toLocaleDateString()}</p>
+            <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+                <div className="flex items-center justify-between mb-8">
+                    <h1 className="text-3xl md:text-4xl font-bold">
+                        Clinical <span className="text-primary">Session</span>
+                    </h1>
+                    <span className={`px-4 py-1.5 rounded-full text-sm font-medium border ${session ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-primary/10 text-primary border-primary/20'
+                        }`}>
+                        {session ? 'Completed' : 'In Progress'}
+                    </span>
                 </div>
 
-                {session ? (
-                    <div className="card">
-                        <h3>Session Record (Completed)</h3>
-                        <p><strong>Diagnosis:</strong> {session.diagnosis}</p>
-                        <p><strong>Complaints:</strong> {session.complaints}</p>
-                        <p><strong>Notes:</strong> {session.notes}</p>
-                        <h4>Prescription</h4>
-                        <ul>
-                            {session.medications.map((m, i) => (
-                                <li key={i}>{m.name} - {m.dosage} ({m.frequency}) for {m.duration}</li>
-                            ))}
-                        </ul>
+                <div className="grid gap-8">
+                    {/* Patient Context Card */}
+                    <div className="bg-surface border border-white/5 rounded-2xl p-6 shadow-lg">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h3 className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-1">Patient</h3>
+                                <p className="text-xl font-bold text-white">{appointment.patientId?.userId?.name}</p>
+                            </div>
+                            <div className="h-px md:h-12 w-full md:w-px bg-white/10"></div>
+                            <div>
+                                <h3 className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-1">Date & Time</h3>
+                                <p className="text-lg text-white">
+                                    {new Date(appointment.date).toLocaleDateString()} <span className="text-gray-500">at</span> {appointment.time}
+                                </p>
+                            </div>
+                            <div className="h-px md:h-12 w-full md:w-px bg-white/10"></div>
+                            <div>
+                                <h3 className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-1">Doctor</h3>
+                                <p className="text-lg text-white">Dr. {appointment.doctorId?.name}</p>
+                            </div>
+                        </div>
                     </div>
-                ) : (
-                    <div className="card">
-                        <h3>Session Status</h3>
-                        {user?.role === 'patient' ? (
-                            <p>This session has not been started by the doctor yet.</p>
-                        ) : (
-                            <>
-                                <h3>New Session Record</h3>
-                                <SessionForm appointment={appointment} onSuccess={() => window.location.reload()} />
-                            </>
-                        )}
-                    </div>
-                )}
-            </div>
+
+                    {session ? (
+                        <div className="bg-surface border border-white/5 rounded-2xl overflow-hidden shadow-xl">
+                            <div className="bg-white/5 px-6 py-4 border-b border-white/5">
+                                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                    <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Session Record
+                                </h3>
+                            </div>
+                            <div className="p-6 space-y-6">
+                                <div>
+                                    <h4 className="text-sm font-medium text-primary mb-2">Diagnosis</h4>
+                                    <p className="text-gray-200 bg-black/30 p-4 rounded-lg border border-white/5">{session.diagnosis}</p>
+                                </div>
+
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div>
+                                        <h4 className="text-sm font-medium text-primary mb-2">Complaints</h4>
+                                        <p className="text-gray-300">{session.complaints}</p>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-medium text-primary mb-2">Notes</h4>
+                                        <p className="text-gray-300">{session.notes || 'No additional notes.'}</p>
+                                    </div>
+                                </div>
+
+                                {session.medications && session.medications.length > 0 && (
+                                    <div>
+                                        <h4 className="text-sm font-medium text-primary mb-3">Prescription</h4>
+                                        <div className="bg-black/30 rounded-lg border border-white/5 overflow-hidden">
+                                            <table className="w-full text-left text-sm text-gray-400">
+                                                <thead className="bg-white/5 text-gray-200 uppercase font-medium">
+                                                    <tr>
+                                                        <th className="px-4 py-3">Medicine</th>
+                                                        <th className="px-4 py-3">Dosage</th>
+                                                        <th className="px-4 py-3">Frequency</th>
+                                                        <th className="px-4 py-3">Duration</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-white/5">
+                                                    {session.medications.map((m, i) => (
+                                                        <tr key={i} className="hover:bg-white/5 transition-colors">
+                                                            <td className="px-4 py-3 font-medium text-white">{m.name}</td>
+                                                            <td className="px-4 py-3">{m.dosage}</td>
+                                                            <td className="px-4 py-3">{m.frequency}</td>
+                                                            <td className="px-4 py-3">{m.duration}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="bg-surface border border-white/5 rounded-2xl p-6 shadow-lg">
+                            {user?.role === 'patient' ? (
+                                <div className="text-center py-12">
+                                    <div className="mx-auto h-16 w-16 bg-white/5 rounded-full flex items-center justify-center mb-4 text-gray-500">
+                                        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-xl font-bold text-white mb-2">Session Not Started</h3>
+                                    <p className="text-gray-400">The doctor has not started this session yet. Please check back later.</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="border-b border-white/10 pb-4 mb-6">
+                                        <h3 className="text-xl font-bold text-white">New Session Record</h3>
+                                        <p className="text-gray-400 text-sm">Document the clinical encounter and prescribe medications.</p>
+                                    </div>
+                                    <SessionForm appointment={appointment} onSuccess={() => window.location.reload()} />
+                                </>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </main>
         </div>
     );
 }
