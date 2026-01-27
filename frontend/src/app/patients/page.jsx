@@ -6,6 +6,7 @@ import PatientForm from '../../components/PatientForm';
 import api from '../../lib/api';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Button from '../../components/Button';
 
 export default function Patients() {
     const [patients, setPatients] = useState([]);
@@ -60,29 +61,28 @@ export default function Patients() {
                         <p className="text-gray-400">Manage patient records and details.</p>
                     </div>
 
-                    <button
-                        className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 shadow-lg ${showForm
-                                ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20'
-                                : 'bg-primary hover:bg-primary-dark text-white shadow-purple-900/20'
-                            }`}
-                        onClick={() => setShowForm(!showForm)}
-                    >
-                        {showForm ? (
-                            <>
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                                Cancel
-                            </>
-                        ) : (
-                            <>
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                </svg>
-                                Add New Patient
-                            </>
-                        )}
-                    </button>
+                    <div className="w-full sm:w-auto">
+                        <Button
+                            className={`w-full sm:w-auto px-6 shadow-lg ${showForm ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400' : 'bg-primary hover:bg-primary-dark'}`}
+                            onClick={() => setShowForm(!showForm)}
+                        >
+                            {showForm ? (
+                                <span className="flex items-center gap-2">
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    Cancel
+                                </span>
+                            ) : (
+                                <span className="flex items-center gap-2">
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    Add New Patient
+                                </span>
+                            )}
+                        </Button>
+                    </div>
                 </div>
 
                 {showForm && (
@@ -118,8 +118,8 @@ export default function Patients() {
                                     </div>
                                 </div>
                                 <span className={`px-2 py-1 rounded text-xs font-semibold uppercase tracking-wide border ${p.gender === 'male' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                        p.gender === 'female' ? 'bg-pink-500/10 text-pink-400 border-pink-500/20' :
-                                            'bg-gray-500/10 text-gray-400 border-gray-500/20'
+                                    p.gender === 'female' ? 'bg-pink-500/10 text-pink-400 border-pink-500/20' :
+                                        'bg-gray-500/10 text-gray-400 border-gray-500/20'
                                     }`}>
                                     {p.gender}
                                 </span>
@@ -159,12 +159,12 @@ export default function Patients() {
                         </div>
                         <h3 className="text-xl font-bold text-white mb-2">No Patients Found</h3>
                         <p className="text-gray-400 max-w-sm mx-auto mb-8">Get started by registering a new patient to the system.</p>
-                        <button
-                            className="px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-lg shadow-lg shadow-purple-900/20 transition-all font-medium"
+                        <Button
+                            className="bg-primary hover:bg-primary-dark text-white shadow-lg shadow-purple-900/20"
                             onClick={() => setShowForm(true)}
                         >
                             Add New Patient
-                        </button>
+                        </Button>
                     </div>
                 )}
             </main>

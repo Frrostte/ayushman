@@ -6,6 +6,7 @@ import PatientForm from '../../../components/PatientForm';
 import AppointmentForm from '../../../components/AppointmentForm';
 import api from '../../../lib/api';
 import { useRouter } from 'next/navigation';
+import Button from '../../../components/Button';
 
 export default function PatientDetails({ params }) {
     const [patient, setPatient] = useState(null);
@@ -103,18 +104,18 @@ export default function PatientDetails({ params }) {
                             </div>
 
                             <div className="grid grid-cols-2 gap-3 mt-6">
-                                <button
+                                <Button
                                     onClick={() => setShowApptForm(!showApptForm)}
-                                    className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-medium transition-all shadow-lg shadow-purple-900/20"
+                                    className="text-sm py-2 shadow-lg shadow-purple-900/20"
                                 >
                                     {showApptForm ? 'Cancel' : 'Book Appointment'}
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     onClick={() => setShowEdit(!showEdit)}
-                                    className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-lg text-sm font-medium transition-all"
+                                    className={`text-sm py-2 ${showEdit ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20' : 'bg-white/5 hover:bg-white/10 text-white border border-white/10'}`}
                                 >
                                     {showEdit ? 'Cancel' : 'Edit Profile'}
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     </div>

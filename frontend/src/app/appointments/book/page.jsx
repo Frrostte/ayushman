@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '../../../lib/api';
 import Navbar from '../../../components/Navbar';
+import Card from '../../../components/Card';
+import Select from '../../../components/Select';
+import Input from '../../../components/Input';
+import Button from '../../../components/Button';
 
 export default function BookingPage() {
     const router = useRouter();
@@ -94,7 +98,7 @@ export default function BookingPage() {
                     <p className="text-gray-400">Schedule a visit with one of our specialists.</p>
                 </div>
 
-                <div className="bg-surface border border-white/5 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+                <Card className="relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-8 opacity-5">
                         <svg className="w-32 h-32 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -104,33 +108,26 @@ export default function BookingPage() {
                     {error && <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-lg mb-6">{error}</div>}
 
                     <form onSubmit={handleBooking} className="space-y-6 relative z-10">
-                        <div>
-                            <label className="block text-gray-400 mb-2 text-sm font-medium">Select Doctor</label>
-                            <select
-                                value={selectedDoctor}
-                                onChange={handleDoctorChange}
-                                className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:ring-2 focus:ring-primary focus:outline-none transition-all placeholder-gray-500 appearance-none"
-                                required
-                            >
-                                <option value="" className="bg-surface text-gray-400">-- Choose a Doctor --</option>
-                                {doctors.map(doc => (
-                                    <option key={doc._id} value={doc._id} className="bg-surface text-white">Dr. {doc.name}</option>
-                                ))}
-                            </select>
-                        </div>
+                        <Select
+                            label="Select Doctor"
+                            value={selectedDoctor}
+                            onChange={handleDoctorChange}
+                            required
+                            options={[
+                                { value: '', label: '-- Choose a Doctor --' },
+                                ...doctors.map(doc => ({ value: doc._id, label: `Dr. ${doc.name}` }))
+                            ]}
+                        />
 
-                        <div>
-                            <label className="block text-gray-400 mb-2 text-sm font-medium">Select Date</label>
-                            <input
-                                type="date"
-                                value={selectedDate}
-                                onChange={handleDateChange}
-                                min={new Date().toISOString().split('T')[0]}
-                                className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:ring-2 focus:ring-primary focus:outline-none transition-all"
-                                style={{ colorScheme: 'dark' }}
-                                required
-                            />
-                        </div>
+                        <Input
+                            label="Select Date"
+                            type="date"
+                            value={selectedDate}
+                            onChange={handleDateChange}
+                            min={new Date().toISOString().split('T')[0]}
+                            required
+                            style={{ colorScheme: 'dark' }}
+                        />
 
                         {selectedDoctor && selectedDate && (
                             <div className="animate-in fade-in slide-in-from-top-4 duration-300">
@@ -163,15 +160,15 @@ export default function BookingPage() {
                             </div>
                         )}
 
-                        <button
+                        <Button
                             type="submit"
                             disabled={!selectedSlot}
-                            className="w-full py-3.5 bg-gradient-to-r from-primary to-accent hover:from-primary-dark hover:to-accent-dark text-white rounded-xl font-semibold shadow-lg shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
+                            className="w-full"
                         >
                             Confirm Booking
-                        </button>
+                        </Button>
                     </form>
-                </div>
+                </Card>
             </main>
         </div>
     );

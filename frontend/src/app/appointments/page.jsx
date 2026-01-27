@@ -6,6 +6,7 @@ import AppointmentForm from '../../components/AppointmentForm';
 import api from '../../lib/api';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Button from '../../components/Button';
 
 export default function Appointments() {
     const [appointments, setAppointments] = useState([]);
@@ -46,12 +47,14 @@ export default function Appointments() {
                     <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-light to-accent">
                         Appointments
                     </h1>
-                    <button
-                        className="px-6 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg shadow-[0_0_20px_-5px_rgba(124,58,237,0.5)] transition-all duration-300 transform hover:scale-105"
-                        onClick={() => setShowForm(!showForm)}
-                    >
-                        {showForm ? 'Cancel' : 'New Appointment'}
-                    </button>
+                    <div className="w-full sm:w-auto">
+                        <Button
+                            className="w-full sm:w-auto px-6 font-medium shadow-[0_0_20px_-5px_rgba(124,58,237,0.5)] hover:scale-105"
+                            onClick={() => setShowForm(!showForm)}
+                        >
+                            {showForm ? 'Cancel' : 'New Appointment'}
+                        </Button>
+                    </div>
                 </div>
 
                 {showForm && (
@@ -83,8 +86,8 @@ export default function Appointments() {
                                         <td className="px-6 py-4 text-gray-300">{appt.doctorId?.name}</td>
                                         <td className="px-6 py-4">
                                             <span className={`px-2 py-1 rounded text-xs font-medium uppercase tracking-wider ${appt.status === 'completed' ? 'bg-green-500/20 text-green-400 border border-green-500/20' :
-                                                    appt.status === 'cancelled' ? 'bg-red-500/20 text-red-400 border border-red-500/20' :
-                                                        'bg-blue-500/20 text-blue-400 border border-blue-500/20'
+                                                appt.status === 'cancelled' ? 'bg-red-500/20 text-red-400 border border-red-500/20' :
+                                                    'bg-blue-500/20 text-blue-400 border border-blue-500/20'
                                                 }`}>
                                                 {appt.status}
                                             </span>

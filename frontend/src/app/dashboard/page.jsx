@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import Navbar from '../../components/Navbar';
 import Link from 'next/link';
 import api from '../../lib/api';
+import Card from '../../components/Card';
+import Input from '../../components/Input';
+import Button from '../../components/Button';
 
 export default function Dashboard() {
     const router = useRouter();
@@ -73,7 +76,7 @@ export default function Dashboard() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Patients Card */}
-                    <div className="group bg-surface border border-white/5 rounded-2xl p-8 hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.3)] relative overflow-hidden">
+                    <Card className="group hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.3)] relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
                             <svg className="w-24 h-24 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -87,10 +90,10 @@ export default function Dashboard() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
                         </Link>
-                    </div>
+                    </Card>
 
                     {/* Appointments Card */}
-                    <div className="group bg-surface border border-white/5 rounded-2xl p-8 hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.3)] relative overflow-hidden">
+                    <Card className="group hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.3)] relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
                             <svg className="w-24 h-24 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -108,13 +111,15 @@ export default function Dashboard() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
                         </Link>
-                    </div>
+                    </Card>
                 </div>
 
                 {/* Availability Section */}
-                <div className="mt-8 bg-surface border border-white/5 rounded-2xl p-8">
-                    <h2 className="text-2xl font-bold mb-6">Set Availability</h2>
-                    <AvailabilityForm />
+                <div className="mt-8">
+                    <Card>
+                        <h2 className="text-2xl font-bold mb-6">Set Availability</h2>
+                        <AvailabilityForm />
+                    </Card>
                 </div>
             </main>
         </div>
@@ -142,49 +147,41 @@ function AvailabilityForm() {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-xl">
+        <form onSubmit={handleSubmit} className="max-w-xl space-y-6">
             {msg && <div className={`p-3 mb-4 rounded ${msg.includes('successfully') ? 'bg-green-500/20 text-green-400' : 'bg-blue-500/20 text-blue-400'}`}>{msg}</div>}
 
-            <div className="mb-6">
-                <label className="block text-gray-400 mb-2">Select Date</label>
-                <input
-                    type="date"
-                    value={formData.date}
-                    onChange={e => setFormData({ ...formData, date: e.target.value })}
-                    min={new Date().toISOString().split('T')[0]}
-                    required
-                    className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:ring-2 focus:ring-primary focus:outline-none"
-                    // Force white calendar icon/text in some browsers
+            <Input
+                label="Select Date"
+                type="date"
+                value={formData.date}
+                onChange={e => setFormData({ ...formData, date: e.target.value })}
+                min={new Date().toISOString().split('T')[0]}
+                required
+                style={{ colorScheme: 'dark' }}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+                <Input
+                    label="Start Time"
+                    type="time"
+                    value={formData.startTime}
+                    onChange={e => setFormData({ ...formData, startTime: e.target.value })}
+                    style={{ colorScheme: 'dark' }}
+                />
+                <Input
+                    label="End Time"
+                    type="time"
+                    value={formData.endTime}
+                    onChange={e => setFormData({ ...formData, endTime: e.target.value })}
                     style={{ colorScheme: 'dark' }}
                 />
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-6">
-                <div>
-                    <label className="block text-gray-400 mb-2">Start Time</label>
-                    <input
-                        type="time"
-                        value={formData.startTime}
-                        onChange={e => setFormData({ ...formData, startTime: e.target.value })}
-                        className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:ring-2 focus:ring-primary focus:outline-none"
-                        style={{ colorScheme: 'dark' }}
-                    />
-                </div>
-                <div>
-                    <label className="block text-gray-400 mb-2">End Time</label>
-                    <input
-                        type="time"
-                        value={formData.endTime}
-                        onChange={e => setFormData({ ...formData, endTime: e.target.value })}
-                        className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:ring-2 focus:ring-primary focus:outline-none"
-                        style={{ colorScheme: 'dark' }}
-                    />
-                </div>
+            <div>
+                <Button type="submit" className="w-auto px-6">
+                    Add Availability
+                </Button>
             </div>
-
-            <button type="submit" className="px-6 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors">
-                Add Availability
-            </button>
         </form>
     );
 }

@@ -4,6 +4,10 @@ import { useEffect, useState } from 'react';
 import Navbar from '../../components/Navbar';
 import Link from 'next/link';
 import api from '../../lib/api';
+import Card from '../../components/Card';
+import Input from '../../components/Input';
+import Select from '../../components/Select';
+import Button from '../../components/Button';
 
 export default function PatientDashboard() {
     const [user, setUser] = useState(null);
@@ -77,9 +81,6 @@ export default function PatientDashboard() {
         setProfileData({ ...profileData, [e.target.name]: e.target.value });
     };
 
-    const inputClasses = "appearance-none rounded-lg relative block w-full px-3 py-3 bg-black/50 border border-white/10 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition-all";
-    const labelClasses = "block text-sm font-medium text-gray-400 mb-1";
-
     if (loading) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
@@ -102,39 +103,60 @@ export default function PatientDashboard() {
                 </div>
 
                 {showProfileForm ? (
-                    <div className="max-w-2xl mx-auto bg-surface border border-white/5 rounded-2xl p-8 shadow-[0_0_50px_-10px_rgba(124,58,237,0.1)]">
+                    <Card className="max-w-2xl mx-auto">
                         <h3 className="text-2xl font-bold text-white mb-2">Complete Your Profile</h3>
                         <p className="text-gray-400 mb-8">Please provide additional details to continue.</p>
                         <form onSubmit={handleProfileSubmit} className="space-y-6">
+                            <Input
+                                label="Date of Birth"
+                                type="date"
+                                name="dateOfBirth"
+                                value={profileData.dateOfBirth}
+                                onChange={handleChange}
+                                required
+                                style={{ colorScheme: 'dark' }}
+                            />
+                            <Select
+                                label="Gender"
+                                name="gender"
+                                value={profileData.gender}
+                                onChange={handleChange}
+                                options={[
+                                    { value: 'male', label: 'Male' },
+                                    { value: 'female', label: 'Female' },
+                                    { value: 'other', label: 'Other' }
+                                ]}
+                            />
                             <div>
-                                <label className={labelClasses}>Date of Birth</label>
-                                <input type="date" name="dateOfBirth" value={profileData.dateOfBirth} onChange={handleChange} required className={inputClasses} />
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Address</label>
+                                <textarea
+                                    name="address"
+                                    value={profileData.address}
+                                    onChange={handleChange}
+                                    required
+                                    className="appearance-none rounded-lg relative block w-full px-3 py-3 bg-black/50 border border-white/10 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition-all"
+                                    rows="3"
+                                />
                             </div>
                             <div>
-                                <label className={labelClasses}>Gender</label>
-                                <select name="gender" value={profileData.gender} onChange={handleChange} className={inputClasses}>
-                                    <option value="male" className="bg-black">Male</option>
-                                    <option value="female" className="bg-black">Female</option>
-                                    <option value="other" className="bg-black">Other</option>
-                                </select>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Medical Notes (Allergies, etc.)</label>
+                                <textarea
+                                    name="medicalNotes"
+                                    value={profileData.medicalNotes}
+                                    onChange={handleChange}
+                                    className="appearance-none rounded-lg relative block w-full px-3 py-3 bg-black/50 border border-white/10 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition-all"
+                                    rows="3"
+                                />
                             </div>
-                            <div>
-                                <label className={labelClasses}>Address</label>
-                                <textarea name="address" value={profileData.address} onChange={handleChange} required className={inputClasses} rows="3" />
-                            </div>
-                            <div>
-                                <label className={labelClasses}>Medical Notes (Allergies, etc.)</label>
-                                <textarea name="medicalNotes" value={profileData.medicalNotes} onChange={handleChange} className={inputClasses} rows="3" />
-                            </div>
-                            <button type="submit" className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:ring-offset-black transition-all duration-300 shadow-lg shadow-purple-900/20">
+                            <Button type="submit">
                                 Save Profile
-                            </button>
+                            </Button>
                         </form>
-                    </div>
+                    </Card>
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Medical Record Card */}
-                        <div className="lg:col-span-1 h-fit bg-surface border border-white/5 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+                        <Card className="lg:col-span-1 h-fit relative overflow-hidden group">
                             <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
                                 <svg className="w-32 h-32 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -166,7 +188,7 @@ export default function PatientDashboard() {
                                     </div>
                                 )}
                             </div>
-                        </div>
+                        </Card>
 
                         {/* Appointments Section */}
                         <div className="lg:col-span-2 space-y-6">
@@ -181,18 +203,18 @@ export default function PatientDashboard() {
                             </div>
 
                             {appointments.length === 0 ? (
-                                <div className="bg-surface border border-white/5 rounded-2xl p-12 text-center">
+                                <Card className="text-center p-12">
                                     <div className="mx-auto h-12 w-12 text-gray-500 mb-4">
                                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                     </div>
                                     <p className="text-gray-400">No appointments scheduled.</p>
-                                </div>
+                                </Card>
                             ) : (
                                 <div className="grid gap-4">
                                     {appointments.map(app => (
-                                        <div key={app._id} className="bg-surface border border-white/5 rounded-xl p-5 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/10 group flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <Card key={app._id} className="p-5 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/10 group flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                             <div className="flex items-start gap-4">
                                                 <div className={`p-3 rounded-lg ${app.status === 'completed' ? 'bg-green-500/10 text-green-500' : 'bg-primary/10 text-primary'}`}>
                                                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -217,7 +239,7 @@ export default function PatientDashboard() {
                                                     View Details
                                                 </Link>
                                             </div>
-                                        </div>
+                                        </Card>
                                     ))}
                                 </div>
                             )}
