@@ -1,0 +1,18 @@
+# Dependencies
+**/node_modules/
+**/package-lock.json
+**/yarn.lock
+
+# Next.js
+**/.next/
+**/dist/
+**/build/
+
+# Environment Variables
+**/.env
+**/.env.local
+*.env
+*.env.local
+
+# Explicit
+/frontend/.next/
