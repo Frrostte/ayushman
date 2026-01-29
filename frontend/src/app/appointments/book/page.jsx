@@ -11,8 +11,10 @@ import Button from '../../../components/Button';
 
 export default function BookingPage() {
     const router = useRouter();
+    const [user, setUser] = useState(null);
     const [doctors, setDoctors] = useState([]);
-    const [patientId, setPatientId] = useState(null);
+    const [patients, setPatients] = useState([]);
+    const [patientId, setPatientId] = useState('');
     const [selectedDoctor, setSelectedDoctor] = useState('');
     const [selectedDate, setSelectedDate] = useState('');
     const [slots, setSlots] = useState([]);
@@ -27,9 +29,27 @@ export default function BookingPage() {
             router.push('/login');
             return;
         }
-        checkPatientProfile();
+        const userStr = localStorage.getItem('user');
+        const parsedUser = JSON.parse(userStr);
+        setUser(parsedUser);
+
+        if (parsedUser.role === 'patient') {
+            checkPatientProfile();
+        } else if (parsedUser.role === 'doctor') {
+            fetchPatients();
+        }
+
         fetchDoctors();
     }, []);
+
+    const fetchPatients = async () => {
+        try {
+            const res = await api.get('/patients');
+            setPatients(res.data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     const checkPatientProfile = async () => {
         try {
@@ -83,8 +103,9 @@ export default function BookingPage() {
         e.preventDefault();
         setError('');
         try {
+
             if (!patientId) {
-                setError('Patient profile not found. Please complete your profile.');
+                setError('Please select a patient.');
                 return;
             }
 
@@ -126,6 +147,31 @@ export default function BookingPage() {
                     {error && <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-lg mb-6">{error}</div>}
 
                     <form onSubmit={handleBooking} className="space-y-6 relative z-10">
+                        {user?.role === 'doctor' && (
+                            <div className="space-y-1">
+                                <label className="block text-sm font-medium text-gray-400">Select Patient</label>
+                                <div className="relative">
+                                    <select
+                                        value={patientId}
+                                        onChange={(e) => setPatientId(e.target.value)}
+                                        className="appearance-none rounded-lg relative block w-full px-3 py-3 bg-black/50 border border-white/10 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition-all"
+                                        required
+                                    >
+                                        <option value="">Select a patient</option>
+                                        {patients.map(p => (
+                                            <option key={p._id} value={p._id}>
+                                                {p.userId?.name} (ID: {p._id.slice(-6)})
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
+                                        <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                         <Select
                             label="Select Doctor"
                             value={selectedDoctor}
@@ -204,7 +250,13 @@ export default function BookingPage() {
                             </p>
 
                             <Button
-                                onClick={() => router.push('/patient-dashboard')}
+                                onClick={() => {
+                                    if (user?.role === 'doctor') {
+                                        router.push('/dashboard');
+                                    } else {
+                                        router.push('/patient-dashboard');
+                                    }
+                                }}
                                 className="w-full shadow-lg shadow-green-500/20 hover:scale-[1.02]"
                             >
                                 Go to Dashboard
