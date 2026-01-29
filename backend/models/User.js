@@ -9,7 +9,8 @@ const userSchema = new mongoose.Schema({
     availability: [{
         date: { type: Date, required: true },
         startTime: { type: String, required: true },
-        endTime: { type: String, required: true }
+        endTime: { type: String, required: true },
+        slotDuration: { type: Number, default: 30 }
     }],
     createdAt: { type: Date, default: Date.now }
 });

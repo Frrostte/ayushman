@@ -30,16 +30,17 @@ router.get('/slots', auth, async (req, res) => {
             return res.json([]);
         }
 
-        const { startTime, endTime } = availability;
+        const { startTime, endTime, slotDuration } = availability;
+        const duration = slotDuration || 30; // Default to 30 min if not set
         const slots = [];
         let currentTime = new Date(`${date}T${startTime}`);
         const endDateTime = new Date(`${date}T${endTime}`);
 
-        // Generate all 30-min slots
+        // Generate slots based on dynamic duration
         while (currentTime < endDateTime) {
             const timeString = currentTime.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
             slots.push(timeString);
-            currentTime.setMinutes(currentTime.getMinutes() + 30);
+            currentTime.setMinutes(currentTime.getMinutes() + duration);
         }
 
         // Fetch existing appointments

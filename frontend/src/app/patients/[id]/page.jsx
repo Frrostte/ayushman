@@ -15,6 +15,7 @@ export default function PatientDetails({ params }) {
     const [showEdit, setShowEdit] = useState(false);
 
     const router = useRouter();
+    
     const { id } = params;
 
     const fetchData = async () => {

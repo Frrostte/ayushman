@@ -18,10 +18,10 @@ router.get('/', auth, async (req, res) => {
 });
 
 // @route   PUT api/doctors/availability
-// @desc    Update doctor availability
+// @desc    Update doctor availability (Single Date)
 // @access  Private (Doctor only)
 router.put('/availability', [auth, roleCheck(['doctor'])], async (req, res) => {
-    const { date, startTime, endTime } = req.body;
+    const { date, startTime, endTime, slotDuration } = req.body;
 
     if (!date || !startTime || !endTime) {
         return res.status(400).json({ msg: 'Please provide date, start time, and end time' });
@@ -34,45 +34,144 @@ router.put('/availability', [auth, roleCheck(['doctor'])], async (req, res) => {
 
     try {
         const doctor = await User.findById(req.user.id);
-
-        console.log('Update Availability Request:', { date, startTime, endTime });
-        console.log('Existing Availability Type:', typeof doctor.availability);
-        console.log('Is Array?', Array.isArray(doctor.availability));
-
         const dateStr = dateObj.toISOString().split('T')[0];
 
-        // Robustly handle existing availability
-        // If it's not an array or looks like old schema, reset it or filter safely
-        if (Array.isArray(doctor.availability)) {
-            doctor.availability = doctor.availability.filter(a => {
-                // Check if entry is valid object and has date
-                if (!a || !a.date) return false;
-                try {
-                    // Check if date is valid
-                    const d = new Date(a.date);
-                    if (isNaN(d.getTime())) return false; // Invalid date in DB, remove it
-                    return d.toISOString().split('T')[0] !== dateStr;
-                } catch (e) {
-                    console.error('Error processing existing availability item:', a, e);
-                    return false; // Remove if error
-                }
-            });
-        } else {
-            console.warn('Resetting availability due to invalid format (likely old schema)');
+        // Ensure availability is an array
+        if (!Array.isArray(doctor.availability)) {
             doctor.availability = [];
         }
+
+        // Remove existing availability for this date
+        doctor.availability = doctor.availability.filter(a => {
+            if (!a || !a.date) return false;
+            try {
+                const d = new Date(a.date);
+                return d.toISOString().split('T')[0] !== dateStr;
+            } catch (e) {
+                return false;
+            }
+        });
 
         // Add new availability
         doctor.availability.push({
             date: dateObj,
             startTime,
-            endTime
+            endTime,
+            slotDuration: slotDuration || 30
         });
 
         await doctor.save();
         res.json(doctor);
     } catch (err) {
         console.error('SERVER ERROR in PUT /availability:', err);
+        res.status(500).json({ msg: 'Server Error: ' + err.message });
+    }
+});
+
+// @route   POST api/doctors/availability/bulk
+// @desc    Bulk update doctor availability
+// @access  Private (Doctor only)
+router.post('/availability/bulk', [auth, roleCheck(['doctor'])], async (req, res) => {
+    const { startDate, endDate, startTime, endTime, daysOfWeek, slotDuration } = req.body;
+
+    if (!startDate || !endDate || !startTime || !endTime) {
+        return res.status(400).json({ msg: 'Please provide start date, end date, start time, and end time' });
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        return res.status(400).json({ msg: 'Invalid date format' });
+    }
+
+    if (start > end) {
+        return res.status(400).json({ msg: 'Start date cannot be after end date' });
+    }
+
+    try {
+        const doctor = await User.findById(req.user.id);
+
+        // Ensure availability is an array
+        if (!Array.isArray(doctor.availability)) {
+            doctor.availability = [];
+        }
+
+        let currentDate = new Date(start);
+
+        // Loop through dates
+        while (currentDate <= end) {
+            const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 1 = Monday, ...
+
+            // Check if this day is selected (if daysOfWeek is provided)
+            if (!daysOfWeek || daysOfWeek.length === 0 || daysOfWeek.includes(dayOfWeek)) {
+
+                const dateStr = currentDate.toISOString().split('T')[0];
+
+                // Remove existing entry for this date if it exists (overwrite)
+                doctor.availability = doctor.availability.filter(a => {
+                    try {
+                        return new Date(a.date).toISOString().split('T')[0] !== dateStr;
+                    } catch (e) { return false; }
+                });
+
+                // Add new entry
+                doctor.availability.push({
+                    date: new Date(currentDate),
+                    startTime,
+                    endTime,
+                    slotDuration: slotDuration || 30
+                });
+            }
+
+            // Next day
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        await doctor.save();
+        res.json({ msg: 'Bulk availability updated successfully', availability: doctor.availability });
+
+    } catch (err) {
+        console.error('SERVER ERROR in POST /availability/bulk:', err);
+        res.status(500).json({ msg: 'Server Error: ' + err.message });
+    }
+});
+
+// @route   DELETE api/doctors/availability
+// @desc    Remove availability for a specific date
+// @access  Private (Doctor only)
+router.delete('/availability', [auth, roleCheck(['doctor'])], async (req, res) => {
+    const { date } = req.query; // Expecting ?date=YYYY-MM-DD
+
+    if (!date) {
+        return res.status(400).json({ msg: 'Please provide date' });
+    }
+
+    try {
+        const doctor = await User.findById(req.user.id);
+        const targetDate = new Date(date).toISOString().split('T')[0];
+
+        if (!Array.isArray(doctor.availability)) {
+            return res.status(404).json({ msg: 'No availability found' });
+        }
+
+        const originalLength = doctor.availability.length;
+
+        doctor.availability = doctor.availability.filter(a => {
+            try {
+                return new Date(a.date).toISOString().split('T')[0] !== targetDate;
+            } catch (e) { return false; }
+        });
+
+        if (doctor.availability.length === originalLength) {
+            return res.status(404).json({ msg: 'Availability not found for this date' });
+        }
+
+        await doctor.save();
+        res.json({ msg: 'Availability removed' });
+
+    } catch (err) {
+        console.error('SERVER ERROR in DELETE /availability:', err);
         res.status(500).json({ msg: 'Server Error: ' + err.message });
     }
 });
