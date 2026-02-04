@@ -5,13 +5,7 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true },
     name: { type: String, required: true },
     phone: { type: String, required: true },
-    role: { type: String, enum: ['doctor', 'patient'], required: true },
-    availability: [{
-        date: { type: Date, required: true },
-        startTime: { type: String, required: true },
-        endTime: { type: String, required: true },
-        slotDuration: { type: Number, default: 30 }
-    }],
+    role: { type: String, enum: ['doctor', 'patient', 'admin'], required: true },
     createdAt: { type: Date, default: Date.now }
 });
 

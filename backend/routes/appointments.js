@@ -4,6 +4,7 @@ const auth = require('../middleware/auth');
 const Appointment = require('../models/Appointment');
 const roleCheck = require('../middleware/roleCheck');
 const User = require('../models/User');
+const Doctor = require('../models/Doctor');
 
 // @route   GET api/appointments/slots
 // @desc    Get available slots for a doctor on a specific date
@@ -17,12 +18,14 @@ router.get('/slots', auth, async (req, res) => {
             return res.status(404).json({ msg: 'Doctor not found' });
         }
 
-        if (!doctor.availability || doctor.availability.length === 0) {
+        const doctorProfile = await Doctor.findOne({ userId: doctorId });
+
+        if (!doctorProfile || !doctorProfile.availability || doctorProfile.availability.length === 0) {
             return res.json([]);
         }
 
         // Find availability for the specific date
-        const availability = doctor.availability.find(
+        const availability = doctorProfile.availability.find(
             a => new Date(a.date).toISOString().split('T')[0] === new Date(date).toISOString().split('T')[0]
         );
 
@@ -70,7 +73,7 @@ router.get('/slots', auth, async (req, res) => {
 // @route   GET api/appointments
 // @desc    Get all appointments
 // @access  Private (Doctor only)
-router.get('/', [auth, roleCheck(['doctor'])], async (req, res) => {
+router.get('/', [auth, roleCheck(['doctor', 'admin'])], async (req, res) => {
     try {
         const appointments = await Appointment.find()
             .populate({

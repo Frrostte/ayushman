@@ -2,14 +2,16 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const User = require('../models/User');
+const Doctor = require('../models/Doctor');
 const roleCheck = require('../middleware/roleCheck');
 
 // @route   GET api/doctors
 // @desc    Get all doctors
 // @access  Private
-router.get('/', auth, async (req, res) => {
+router.get('/', [auth, roleCheck(['admin'])], async (req, res) => {
     try {
         const doctors = await User.find({ role: 'doctor' }).select('-password');
+        // Optional: Aggregate with Doctor model if needed, but for simple list, user info is enough.
         res.json(doctors);
     } catch (err) {
         console.error(err.message);
@@ -17,10 +19,38 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
+// @route   GET api/doctors/:id
+// @desc    Get single doctor by ID (User ID)
+// @access  Private (Admin only)
+router.get('/:id', [auth, roleCheck(['admin'])], async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id).select('-password');
+        if (!user || user.role !== 'doctor') {
+            return res.status(404).json({ msg: 'Doctor not found' });
+        }
+
+        const doctorProfile = await Doctor.findOne({ userId: req.params.id });
+
+        // Merge user and doctor profile
+        const doctorData = {
+            ...user.toObject(),
+            ...doctorProfile?.toObject()
+        };
+
+        res.json(doctorData);
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'Doctor not found' });
+        }
+        res.status(500).send('Server Error');
+    }
+});
+
 // @route   PUT api/doctors/availability
 // @desc    Update doctor availability (Single Date)
 // @access  Private (Doctor only)
-router.put('/availability', [auth, roleCheck(['doctor'])], async (req, res) => {
+router.put('/availability', [auth, roleCheck(['doctor', 'admin'])], async (req, res) => {
     const { date, startTime, endTime, slotDuration } = req.body;
 
     if (!date || !startTime || !endTime) {
@@ -33,7 +63,12 @@ router.put('/availability', [auth, roleCheck(['doctor'])], async (req, res) => {
     }
 
     try {
-        const doctor = await User.findById(req.user.id);
+        let doctor = await Doctor.findOne({ userId: req.user.id });
+        if (!doctor) {
+            // Create doctor profile if it doesn't exist
+            doctor = new Doctor({ userId: req.user.id, availability: [] });
+        }
+
         const dateStr = dateObj.toISOString().split('T')[0];
 
         // Ensure availability is an array
@@ -71,7 +106,7 @@ router.put('/availability', [auth, roleCheck(['doctor'])], async (req, res) => {
 // @route   POST api/doctors/availability/bulk
 // @desc    Bulk update doctor availability
 // @access  Private (Doctor only)
-router.post('/availability/bulk', [auth, roleCheck(['doctor'])], async (req, res) => {
+router.post('/availability/bulk', [auth, roleCheck(['doctor', 'admin'])], async (req, res) => {
     const { startDate, endDate, startTime, endTime, daysOfWeek, slotDuration } = req.body;
 
     if (!startDate || !endDate || !startTime || !endTime) {
@@ -90,7 +125,10 @@ router.post('/availability/bulk', [auth, roleCheck(['doctor'])], async (req, res
     }
 
     try {
-        const doctor = await User.findById(req.user.id);
+        let doctor = await Doctor.findOne({ userId: req.user.id });
+        if (!doctor) {
+            doctor = new Doctor({ userId: req.user.id, availability: [] });
+        }
 
         // Ensure availability is an array
         if (!Array.isArray(doctor.availability)) {
@@ -140,7 +178,7 @@ router.post('/availability/bulk', [auth, roleCheck(['doctor'])], async (req, res
 // @route   DELETE api/doctors/availability
 // @desc    Remove availability for a specific date
 // @access  Private (Doctor only)
-router.delete('/availability', [auth, roleCheck(['doctor'])], async (req, res) => {
+router.delete('/availability', [auth, roleCheck(['doctor', 'admin'])], async (req, res) => {
     const { date } = req.query; // Expecting ?date=YYYY-MM-DD
 
     if (!date) {
@@ -148,10 +186,10 @@ router.delete('/availability', [auth, roleCheck(['doctor'])], async (req, res) =
     }
 
     try {
-        const doctor = await User.findById(req.user.id);
+        const doctor = await Doctor.findOne({ userId: req.user.id });
         const targetDate = new Date(date).toISOString().split('T')[0];
 
-        if (!Array.isArray(doctor.availability)) {
+        if (!doctor || !Array.isArray(doctor.availability)) {
             return res.status(404).json({ msg: 'No availability found' });
         }
 

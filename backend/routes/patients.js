@@ -9,7 +9,7 @@ const roleCheck = require('../middleware/roleCheck');
 // @route   GET api/patients
 // @desc    Get all patients
 // @access  Private (Doctor only)
-router.get('/', [auth, roleCheck(['doctor'])], async (req, res) => {
+router.get('/', [auth, roleCheck(['doctor', 'admin'])], async (req, res) => {
     try {
         const patients = await Patient.find().populate('userId', 'name email phone').sort({ createdAt: -1 });
         res.json(patients);
