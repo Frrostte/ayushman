@@ -69,14 +69,16 @@ export default function Appointments() {
                     <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-light to-accent">
                         Appointments
                     </h1>
-                    <div className="w-full sm:w-auto">
-                        <Button
-                            className="w-full sm:w-auto px-6 font-medium shadow-[0_0_20px_-5px_rgba(124,58,237,0.5)] hover:scale-105"
-                            onClick={() => router.push('/appointments/book')}
-                        >
-                            New Appointment
-                        </Button>
-                    </div>
+                    {user && user.role !== 'doctor' && (
+                        <div className="w-full sm:w-auto">
+                            <Button
+                                className="w-full sm:w-auto px-6 font-medium shadow-[0_0_20px_-5px_rgba(124,58,237,0.5)] hover:scale-105"
+                                onClick={() => router.push('/appointments/book')}
+                            >
+                                New Appointment
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
 

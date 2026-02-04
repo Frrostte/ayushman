@@ -44,6 +44,14 @@ export default function Dashboard() {
                 patients: pRes.data.length,
                 appointments: todayAppts
             });
+
+            // If Admin, fetch doctors
+            if (userRes.data.role === 'admin') {
+                try {
+                    const dRes = await api.get('/doctors');
+                    setStats(prev => ({ ...prev, doctors: dRes.data.length }));
+                } catch (e) { console.error('Error fetching doctors', e); }
+            }
         } catch (e) {
             console.error(e);
             if (e.response && e.response.status === 401) {
@@ -81,12 +89,12 @@ export default function Dashboard() {
             <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
                 <div className="mb-12">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                        Welcome back, <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-light to-accent">{user?.name}</span>
+                        Welcome, <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-light to-accent">{user?.name}</span>
                     </h1>
                     <p className="text-gray-400 text-lg">Here's what's happening in your clinic today.</p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {/* Patients Card */}
                     <Card className="group hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.3)] relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -124,30 +132,51 @@ export default function Dashboard() {
                             </svg>
                         </Link>
                     </Card>
+
+                    {/* Admin: Doctors Card */}
+                    {user?.role === 'admin' && (
+                        <Card className="group hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.3)] relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <svg className="w-24 h-24 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-gray-400 font-medium mb-2">Total Doctors</h3>
+                            <p className="text-5xl font-bold text-white mb-6">{stats.doctors || 0}</p>
+                            <Link href="/doctors" className="inline-flex items-center text-primary-light hover:text-white transition-colors group-hover:translate-x-1 duration-300">
+                                Manage Doctors
+                                <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                </svg>
+                            </Link>
+                        </Card>
+                    )}
                 </div>
 
-                {/* Availability Section */}
-                <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Form Section */}
-                    <div className="lg:col-span-1">
-                        <Card>
-                            <h2 className="text-xl font-bold mb-6">Manage Availability</h2>
-                            <AvailabilityForm onUpdate={refreshUser} />
-                        </Card>
-                    </div>
+                {/* Availability Section - Only for Doctors */}
+                {user?.role === 'doctor' && (
+                    <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Form Section */}
+                        <div className="lg:col-span-1">
+                            <Card>
+                                <h2 className="text-xl font-bold mb-6">Manage Availability</h2>
+                                <AvailabilityForm onUpdate={refreshUser} />
+                            </Card>
+                        </div>
 
-                    {/* List Section */}
-                    <div className="lg:col-span-2">
-                        <Card className="h-full">
-                            <h2 className="text-xl font-bold mb-6">Upcoming Availability</h2>
-                            {user?.availability && user.availability.length > 0 ? (
-                                <AvailabilityList availability={user.availability} onUpdate={refreshUser} />
-                            ) : (
-                                <p className="text-gray-400">No availability set. Please add some slots.</p>
-                            )}
-                        </Card>
+                        {/* List Section */}
+                        <div className="lg:col-span-2">
+                            <Card className="h-full">
+                                <h2 className="text-xl font-bold mb-6">Upcoming Availability</h2>
+                                {user?.availability && user.availability.length > 0 ? (
+                                    <AvailabilityList availability={user.availability} onUpdate={refreshUser} />
+                                ) : (
+                                    <p className="text-gray-400">No availability set. Please add some slots.</p>
+                                )}
+                            </Card>
+                        </div>
                     </div>
-                </div>
+                )}
             </main>
         </div>
     );

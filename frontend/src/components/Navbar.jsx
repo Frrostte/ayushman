@@ -51,6 +51,11 @@ export default function Navbar() {
                                     <Link href="/dashboard" className={`text-sm font-medium transition-colors ${isActive('/dashboard') ? 'text-primary-light' : 'text-gray-400 hover:text-white'}`}>
                                         Dashboard
                                     </Link>
+                                    {role === 'admin' && (
+                                        <Link href="/doctors" className={`text-sm font-medium transition-colors ${isActive('/doctors') ? 'text-primary-light' : 'text-gray-400 hover:text-white'}`}>
+                                            Doctors
+                                        </Link>
+                                    )}
                                     <Link href="/patients" className={`text-sm font-medium transition-colors ${isActive('/patients') ? 'text-primary-light' : 'text-gray-400 hover:text-white'}`}>
                                         Patients
                                     </Link>
