@@ -82,14 +82,20 @@ export default function AvailabilityForm({ onUpdate }) {
     };
 
     return (
-        <div className="space-y-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
-                {msg && <div className={`p-3 rounded text-sm ${msg.toLowerCase().includes('failed') || msg.toLowerCase().includes('error') ? 'bg-red-500/20 text-red-400' :
-                    msg.includes('No slots added') ? 'bg-yellow-500/20 text-yellow-400' :
-                        'bg-green-500/20 text-green-400'
-                    }`}>{msg}</div>}
+        <div className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+                {msg && (
+                    <div className={`p-4 rounded-2xl text-xs font-bold uppercase tracking-widest text-center border animate-fade-in ${msg.toLowerCase().includes('failed') || msg.toLowerCase().includes('error')
+                            ? 'bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-500/50 text-red-600 dark:text-red-400' :
+                            msg.includes('No slots added')
+                                ? 'bg-yellow-50 dark:bg-yellow-500/10 border-yellow-100 dark:border-yellow-500/50 text-yellow-600 dark:text-yellow-400' :
+                                'bg-green-50 dark:bg-green-500/10 border-green-100 dark:border-green-500/50 text-green-600 dark:text-green-400'
+                        }`}>
+                        {msg}
+                    </div>
+                )}
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                     <Input
                         label="Start Date"
                         type="date"
@@ -97,33 +103,31 @@ export default function AvailabilityForm({ onUpdate }) {
                         onChange={e => setFormData({ ...formData, startDate: e.target.value })}
                         min={new Date().toISOString().split('T')[0]}
                         required
-                        style={{ colorScheme: 'dark' }}
+                        style={{ colorScheme: 'light dark' }}
                     />
                     <Input
                         label="End Date"
                         type="date"
                         value={formData.endDate}
                         onChange={e => setFormData({ ...formData, endDate: e.target.value })}
-                        min={new Date().toISOString().split('T')[0]} // better UX to prevent past ranges
-                        // Actually user might paste date, better let validation handle it or auto-set min
-                        // min={formData.startDate || new Date().toISOString().split('T')[0]}
+                        min={new Date().toISOString().split('T')[0]}
                         required
-                        style={{ colorScheme: 'dark' }}
+                        style={{ colorScheme: 'light dark' }}
                     />
                 </div>
 
                 {/* Days Selection for Bulk */}
                 <div className="space-y-4">
-                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Repeat On</label>
-                    <div className="flex flex-wrap gap-3">
+                    <label className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest block">Repeat On</label>
+                    <div className="flex flex-wrap gap-2.5">
                         {days.map(d => (
                             <button
                                 key={d.id}
                                 type="button"
                                 onClick={() => toggleDay(d.id)}
-                                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all shadow-sm ${formData.daysOfWeek.includes(d.id)
-                                    ? 'bg-primary text-white shadow-primary/30 shadow-lg scale-105'
-                                    : 'bg-white dark:bg-zinc-800 text-gray-500 hover:bg-gray-50 border border-gray-200 dark:border-zinc-700'
+                                className={`w-11 h-11 rounded-2xl flex items-center justify-center text-xs font-black transition-all duration-300 shadow-sm ${formData.daysOfWeek.includes(d.id)
+                                    ? 'bg-primary text-white shadow-primary/20 shadow-xl scale-110 ring-4 ring-primary/5'
+                                    : 'bg-gray-50 dark:bg-white/5 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 border border-gray-100 dark:border-white/10'
                                     }`}
                             >
                                 {d.label.charAt(0)}
@@ -132,13 +136,13 @@ export default function AvailabilityForm({ onUpdate }) {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                     <Input
                         label="Start Time"
                         type="time"
                         value={formData.startTime}
                         onChange={e => setFormData({ ...formData, startTime: e.target.value })}
-                        style={{ colorScheme: 'dark' }}
+                        style={{ colorScheme: 'light dark' }}
                         required
                     />
                     <Input
@@ -146,29 +150,31 @@ export default function AvailabilityForm({ onUpdate }) {
                         type="time"
                         value={formData.endTime}
                         onChange={e => setFormData({ ...formData, endTime: e.target.value })}
-                        style={{ colorScheme: 'dark' }}
+                        style={{ colorScheme: 'light dark' }}
                         required
                     />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-4">
                     <Select
-                        label="Interval"
+                        label="Slot Duration"
                         name="slotDuration"
                         value={formData.slotDuration}
                         onChange={e => setFormData({ ...formData, slotDuration: e.target.value })}
                         options={[
-                            { value: '15', label: '15 min' },
-                            { value: '30', label: '30 min' },
-                            { value: '45', label: '45 min' },
-                            { value: '60', label: '60 min' }
+                            { value: '15', label: '15 minutes' },
+                            { value: '30', label: '30 minutes' },
+                            { value: '45', label: '45 minutes' },
+                            { value: '60', label: '1 hour' }
                         ]}
                     />
                 </div>
 
-                <Button type="submit" disabled={loading} className="w-full py-2.5">
-                    {loading ? 'Saving...' : 'Add Availability'}
-                </Button>
+                <div className="pt-2">
+                    <Button type="submit" disabled={loading} className="w-full py-4 text-xs font-bold uppercase tracking-widest shadow-xl shadow-primary/10 hover:scale-[1.02] transition-transform rounded-2xl">
+                        {loading ? 'Creating Schedule...' : 'Generate Slots'}
+                    </Button>
+                </div>
             </form>
         </div>
     );

@@ -58,13 +58,13 @@ export default function Sidebar() {
     ];
 
     return (
-        <aside className="fixed left-0 top-0 h-full w-64 bg-surface border-r border-border flex flex-col justify-between z-40 hidden md:flex">
+        <aside className="fixed left-0 top-0 h-full w-64 bg-white dark:bg-surface border-r border-gray-100 dark:border-white/5 flex flex-col justify-between z-40 hidden md:flex shadow-xl shadow-gray-200/20 dark:shadow-none">
             {/* Logo Section */}
             <div className="p-8">
-                <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+                <h1 className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-light tracking-tighter">
                     AYUSHMAN
                 </h1>
-                <p className="text-xs text-secondary tracking-widest mt-1 font-medium">CLINIC MANAGEMENT</p>
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 tracking-[0.2em] mt-1 font-bold">CLINIC MANAGEMENT</p>
             </div>
 
             {/* Navigation */}
@@ -86,37 +86,37 @@ export default function Sidebar() {
                         <Link
                             key={item.name}
                             href={item.href}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${active
-                                ? 'bg-primary/10 text-primary font-semibold'
-                                : 'text-secondary hover:bg-gray-50 dark:hover:bg-white/5 hover:text-foreground'
+                            className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group ${active
+                                ? 'bg-primary/10 text-primary font-bold shadow-sm shadow-primary/5'
+                                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-primary'
                                 }`}
                         >
-                            <span className={`${active ? 'text-primary' : 'text-gray-400 group-hover:text-foreground'}`}>
+                            <span className={`${active ? 'text-primary' : 'text-gray-400 group-hover:text-primary transition-colors'}`}>
                                 {item.icon}
                             </span>
-                            {item.name}
+                            <span className="text-sm tracking-tight">{item.name}</span>
                         </Link>
                     )
                 })}
             </nav>
 
             {/* Bottom Actions */}
-            <div className="p-6 border-t border-border space-y-6">
+            <div className="p-6 border-t border-gray-100 dark:border-white/5 space-y-8">
 
                 {/* Theme Toggle */}
-                <div className="flex items-center justify-between px-2">
-                    <span className="text-sm font-medium text-secondary">Theme</span>
+                <div className="flex items-center justify-between px-3 py-3 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 shadow-inner">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Theme</span>
                     <ThemeToggle />
                 </div>
 
                 {/* User Profile */}
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+                <div className="flex items-center gap-3 p-2 group cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 rounded-2xl transition-all">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold shadow-sm group-hover:scale-105 transition-transform">
                         {user?.name?.[0] || 'D'}
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-foreground truncate">{user?.name || 'Dr. User'}</p>
-                        <p className="text-xs text-secondary truncate">{user?.email || 'doctor@clinic.com'}</p>
+                        <p className="text-sm font-bold text-gray-900 dark:text-white truncate tracking-tight">{user?.name || 'Dr. User'}</p>
+                        <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate font-medium">{user?.email || 'doctor@clinic.com'}</p>
                     </div>
                     <button
                         onClick={() => {
@@ -124,10 +124,11 @@ export default function Sidebar() {
                             localStorage.removeItem('user');
                             window.location.href = '/login';
                         }}
-                        className="text-gray-400 hover:text-red-500 transition-colors"
+                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
+                        title="Logout"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
                     </button>
                 </div>

@@ -86,107 +86,110 @@ export default function Dashboard() {
 
     return (
         <div className="text-foreground">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-2">
+            <div className="mb-10">
+                <h1 className="text-4xl font-black mb-2 tracking-tight">
                     Welcome, <span className="text-primary">{user?.name}</span>
                 </h1>
-                <p className="text-secondary">Here's a summary of what's happening today.</p>
+                <p className="text-gray-500 dark:text-gray-400 font-medium">Here's a summary of what's happening today.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {/* Patients Card */}
-                <Card className="group hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.3)] relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Card className="group hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 relative overflow-hidden bg-white dark:bg-surface border-gray-100 dark:border-white/5 rounded-3xl p-8">
+                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-20 transition-opacity duration-500 transform group-hover:scale-110 group-hover:-rotate-12">
                         <svg className="w-24 h-24 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                     </div>
-                    <h3 className="text-secondary font-medium mb-2">Total Patients</h3>
-                    <p className="text-5xl font-bold text-foreground mb-6">{stats.patients}</p>
-                    <Link href="/patients" className="inline-flex items-center text-primary hover:text-foreground transition-colors group-hover:translate-x-1 duration-300">
-                        Manage Patients
+                    <h3 className="text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-4">Total Patients</h3>
+                    <p className="text-6xl font-black text-gray-900 dark:text-white mb-8 tracking-tighter">{stats.patients}</p>
+                    <Link href="/patients" className="inline-flex items-center text-primary font-bold hover:gap-3 transition-all duration-300">
+                        Manage Records
                         <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                         </svg>
                     </Link>
                 </Card>
 
                 {/* Appointments Card */}
-                <Card className="group hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.3)] relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Card className="group hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 relative overflow-hidden bg-white dark:bg-surface border-gray-100 dark:border-white/5 rounded-3xl p-8">
+                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-20 transition-opacity duration-500 transform group-hover:scale-110 group-hover:-rotate-12">
                         <svg className="w-24 h-24 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <div className="flex items-center gap-2 mb-2">
-                        <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-                        <h3 className="text-secondary font-medium">Today's Appointments</h3>
+                    <div className="flex items-center gap-2 mb-4">
+                        <div className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse"></div>
+                        <h3 className="text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest text-[10px]">Today's Appointments</h3>
                     </div>
 
-                    <p className="text-5xl font-bold text-foreground mb-6">{stats.appointments}</p>
-                    <Link href="/appointments" className="inline-flex items-center text-primary hover:text-foreground transition-colors group-hover:translate-x-1 duration-300">
+                    <p className="text-6xl font-black text-gray-900 dark:text-white mb-8 tracking-tighter">{stats.appointments}</p>
+                    <Link href="/appointments" className="inline-flex items-center text-primary font-bold hover:gap-3 transition-all duration-300">
                         View Schedule
                         <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                         </svg>
                     </Link>
                 </Card>
 
                 {/* Admin: Doctors Card */}
                 {user?.role === 'admin' && (
-                    <Card className="group hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.3)] relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Card className="group hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 relative overflow-hidden bg-white dark:bg-surface border-gray-100 dark:border-white/5 rounded-3xl p-8">
+                        <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-20 transition-opacity duration-500 transform group-hover:scale-110 group-hover:-rotate-12">
                             <svg className="w-24 h-24 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                         </div>
-                        <h3 className="text-gray-400 font-medium mb-2">Total Doctors</h3>
-                        <p className="text-5xl font-bold text-white mb-6">{stats.doctors || 0}</p>
-                        <Link href="/doctors" className="inline-flex items-center text-primary-light hover:text-white transition-colors group-hover:translate-x-1 duration-300">
-                            Manage Doctors
+                        <h3 className="text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-4">Total Doctors</h3>
+                        <p className="text-6xl font-black text-gray-900 dark:text-white mb-8 tracking-tighter">{stats.doctors || 0}</p>
+                        <Link href="/doctors" className="inline-flex items-center text-primary font-bold hover:gap-3 transition-all duration-300">
+                            Manage Staff
                             <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
                         </Link>
                     </Card>
                 )}
                 {/* Quick Actions Card - Doctors Only */}
                 {user?.role === 'doctor' && (
-                    <Card className="flex flex-col justify-center">
-                        <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-gray-500 font-medium tracking-wider text-xs uppercase">Quick Actions</h3>
+                    <Card className="flex flex-col justify-center bg-white dark:bg-surface border-gray-100 dark:border-white/5 rounded-3xl p-8 shadow-xl">
+                        <div className="flex items-center justify-between mb-8">
+                            <h3 className="text-gray-400 dark:text-gray-500 font-bold tracking-widest text-[10px] uppercase">Quick Management</h3>
                         </div>
 
-                        <div className="space-y-3">
-                            <Link href="/profile" className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-gray-100 dark:hover:border-white/10 hover:shadow-md transition-all group/item">
-                                <span className="font-semibold text-gray-700 dark:text-gray-200 group-hover/item:text-primary transition-colors flex items-center gap-3">
-                                    <span className="p-2 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                        <div className="space-y-4">
+                            <Link href="/profile" className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-gray-100 dark:hover:border-white/10 hover:shadow-xl transition-all group/item">
+                                <span className="font-bold text-gray-700 dark:text-gray-200 group-hover/item:text-primary transition-colors flex items-center gap-4">
+                                    <span className="p-2.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl shadow-sm">
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                                     </span>
-                                    Edit Profile
+                                    My Profile
                                 </span>
-                                <svg className="w-4 h-4 text-gray-300 group-hover/item:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
+                                <div className="p-1.5 bg-gray-100 dark:bg-white/5 rounded-lg opacity-0 group-hover/item:opacity-100 transition-opacity">
+                                    <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </div>
                             </Link>
 
-                            <Link href="/settings" className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-gray-100 dark:hover:border-white/10 hover:shadow-md transition-all group/item">
-                                <span className="font-semibold text-gray-700 dark:text-gray-200 group-hover/item:text-primary transition-colors flex items-center gap-3">
-                                    <span className="p-2 bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 rounded-lg">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                            <Link href="/settings" className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-gray-100 dark:hover:border-white/10 hover:shadow-xl transition-all group/item">
+                                <span className="font-bold text-gray-700 dark:text-gray-200 group-hover/item:text-primary transition-colors flex items-center gap-4">
+                                    <span className="p-2.5 bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-xl shadow-sm">
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                                     </span>
                                     Clinic Settings
                                 </span>
-                                <svg className="w-4 h-4 text-gray-300 group-hover/item:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
+                                <div className="p-1.5 bg-gray-100 dark:bg-white/5 rounded-lg opacity-0 group-hover/item:opacity-100 transition-opacity">
+                                    <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </div>
                             </Link>
                         </div>
                     </Card>
                 )}
 
             </div>
-
 
         </div>
 

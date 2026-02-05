@@ -53,58 +53,68 @@ export default function NewDoctor() {
     };
 
     return (
-        <div className="text-foreground max-w-2xl mx-auto">
-            <Card>
-                <h1 className="text-3xl font-bold mb-6">Add New Doctor</h1>
+        <div className="text-foreground max-w-3xl mx-auto">
+            <div className="mb-10">
+                <h1 className="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-light tracking-tight mb-2">
+                    Add New Doctor
+                </h1>
+                <p className="text-gray-500 dark:text-gray-400 font-medium tracking-tight">Create a professional profile for a new clinical staff member.</p>
+            </div>
 
+            <Card className="bg-white dark:bg-surface border border-gray-100 dark:border-white/5 rounded-3xl shadow-xl p-8 md:p-10">
                 {error && (
-                    <div className="bg-red-500/10 border border-red-500/50 text-red-500 px-4 py-3 rounded-lg mb-6 text-sm">
+                    <div className="bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/30 text-red-600 dark:text-red-400 px-6 py-4 rounded-2xl mb-8 text-sm font-bold uppercase tracking-widest text-center">
                         {error}
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <Input
-                        label="Full Name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                    />
-                    <Input
-                        label="Email Address"
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                    />
-                    <Input
-                        label="Phone Number"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        required
-                    />
-                    <Input
-                        label="Password"
-                        type="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                    />
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <Input
+                            label="Full Name"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            required
+                        />
+                        <Input
+                            label="Email Address"
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
 
-                    <div className="pt-4 flex gap-4">
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <Input
+                            label="Phone Number"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            required
+                        />
+                        <Input
+                            label="Password"
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
+                    <div className="pt-8 flex flex-col md:flex-row gap-4">
                         <Button
                             type="button"
-                            className="bg-transparent border border-gray-600 hover:border-gray-500 text-gray-300 w-full"
+                            className="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 w-full hover:bg-gray-200 hover:text-gray-900 transition-all py-4 text-xs font-bold uppercase tracking-widest rounded-2xl"
                             onClick={() => router.back()}
                         >
                             Cancel
                         </Button>
-                        <Button type="submit" isLoading={loading} className="w-full">
-                            Create Doctor Account
+                        <Button type="submit" isLoading={loading} className="w-full py-4 text-xs font-bold uppercase tracking-widest shadow-xl shadow-primary/10 hover:scale-[1.02] transition-transform rounded-2xl">
+                            Create Professional Account
                         </Button>
                     </div>
                 </form>

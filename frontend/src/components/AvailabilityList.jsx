@@ -65,9 +65,11 @@ export default function AvailabilityList({ availability, onUpdate }) {
     };
 
     return (
-        <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+        <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
             {upcomingAvailability.length === 0 ? (
-                <p className="text-gray-400">No upcoming availability found.</p>
+                <div className="text-center py-10 bg-gray-50 dark:bg-white/5 rounded-3xl border border-dashed border-gray-200 dark:border-white/10">
+                    <p className="text-gray-400 font-medium italic">No upcoming availability found.</p>
+                </div>
             ) : upcomingAvailability.map((slot, idx) => {
                 const dateObj = new Date(slot.date);
                 const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
@@ -75,61 +77,72 @@ export default function AvailabilityList({ availability, onUpdate }) {
                 const isEditing = editingDate === isoDate;
 
                 return (
-                    <div key={idx} className="group flex items-center justify-between p-4 rounded-xl bg-white dark:bg-white/5 border border-transparent hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 transition-all mb-3">
+                    <div key={idx} className="group flex items-center justify-between p-5 rounded-3xl bg-gray-50 dark:bg-white/5 border border-transparent hover:border-primary/30 hover:bg-white dark:hover:bg-white/10 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
                         {isEditing ? (
-                            <div className="flex-1 flex items-center gap-2">
-                                <div className="text-sm text-gray-300 w-24">{dateStr}</div>
-                                <input
-                                    type="time"
-                                    value={editForm.startTime}
-                                    onChange={e => setEditForm({ ...editForm, startTime: e.target.value })}
-                                    onClick={e => e.target.showPicker && e.target.showPicker()}
-                                    className="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-primary cursor-pointer w-36"
-                                    style={{ colorScheme: 'dark' }}
-                                />
-                                <span className="text-gray-400">-</span>
-                                <input
-                                    type="time"
-                                    value={editForm.endTime}
-                                    onChange={e => setEditForm({ ...editForm, endTime: e.target.value })}
-                                    onClick={e => e.target.showPicker && e.target.showPicker()}
-                                    className="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-primary cursor-pointer w-36"
-                                    style={{ colorScheme: 'dark' }}
-                                />
-                                <div className="flex gap-1 ml-auto">
-                                    <button onClick={() => saveEdit(isoDate)} className="p-1 text-green-400 hover:bg-green-500/10 rounded">
-                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                            <div className="flex-1 flex flex-col sm:flex-row items-center gap-4">
+                                <div className="text-sm font-bold text-gray-900 dark:text-white sm:w-32">{dateStr}</div>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="time"
+                                        value={editForm.startTime}
+                                        onChange={e => setEditForm({ ...editForm, startTime: e.target.value })}
+                                        className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all cursor-pointer shadow-sm"
+                                        style={{ colorScheme: 'light dark' }}
+                                    />
+                                    <span className="text-gray-400 font-bold">to</span>
+                                    <input
+                                        type="time"
+                                        value={editForm.endTime}
+                                        onChange={e => setEditForm({ ...editForm, endTime: e.target.value })}
+                                        className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all cursor-pointer shadow-sm"
+                                        style={{ colorScheme: 'light dark' }}
+                                    />
+                                </div>
+                                <div className="flex gap-2 ml-auto">
+                                    <button onClick={() => saveEdit(isoDate)} className="p-2.5 bg-green-500/10 text-green-600 rounded-xl hover:bg-green-500 hover:text-white transition-all shadow-sm">
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
                                     </button>
-                                    <button onClick={cancelEdit} className="p-1 text-gray-400 hover:bg-gray-500/10 rounded">
-                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                    <button onClick={cancelEdit} className="p-2.5 bg-gray-200/50 dark:bg-white/5 text-gray-500 dark:text-gray-400 rounded-xl hover:bg-gray-300 dark:hover:bg-white/10 transition-all shadow-sm">
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
                                     </button>
                                 </div>
                             </div>
                         ) : (
                             <>
-                                <div className="flex items-center gap-4">
-                                    <div className="flex flex-col items-center justify-center bg-primary/10 rounded-xl px-4 py-2 min-w-[70px]">
-                                        <span className="text-xs font-bold text-primary uppercase tracking-wider">{dateObj.toLocaleString('default', { month: 'short' })}</span>
-                                        <span className="text-xl font-bold text-primary">{dateObj.getDate()}</span>
+                                <div className="flex items-center gap-6">
+                                    <div className="flex flex-col items-center justify-center bg-primary/10 rounded-2xl px-5 py-3 min-w-[80px] shadow-sm transform group-hover:scale-105 transition-transform">
+                                        <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">{dateObj.toLocaleString('default', { month: 'short' })}</span>
+                                        <span className="text-2xl font-black text-primary tracking-tighter">{dateObj.getDate()}</span>
                                     </div>
                                     <div>
-                                        <p className="font-bold text-foreground text-lg">{dateStr.split(',')[0]}</p>
-                                        <p className="text-sm text-secondary flex items-center gap-2">
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
+                                        <p className="font-bold text-gray-900 dark:text-white text-xl tracking-tight mb-1">{dateStr.split(',')[0]}</p>
+                                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                                            <div className="p-1 bg-primary/5 rounded-md">
+                                                <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </div>
                                             {slot.startTime} - {slot.endTime}
                                         </p>
                                     </div>
                                 </div>
-                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => startEdit(slot)}
+                                        className="p-2.5 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                                        title="Edit Hours"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
                                     <button
                                         onClick={() => confirmDelete(isoDate)}
-                                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                                        className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all opacity-0 group-hover:opacity-100"
                                         title="Remove Availability"
                                     >
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
                                     </button>
                                 </div>

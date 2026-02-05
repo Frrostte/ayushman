@@ -56,7 +56,7 @@ export default function Patients() {
                     <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-light to-accent mb-2">
                         Patients
                     </h1>
-                    <p className="text-gray-400">Manage patient records and details.</p>
+                    <p className="text-gray-500 dark:text-gray-400">Manage patient records and details.</p>
                 </div>
 
                 <div className="w-full sm:w-auto">
@@ -76,56 +76,56 @@ export default function Patients() {
 
 
 
-            <div className="bg-surface rounded-2xl border border-white/5 shadow-xl overflow-hidden">
+            <div className="bg-white dark:bg-surface rounded-3xl border border-gray-100 dark:border-white/5 shadow-xl overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="bg-white/5 border-b border-white/5">
-                                <th className="px-6 py-4 text-sm font-medium text-gray-400">Patient</th>
-                                <th className="px-6 py-4 text-sm font-medium text-gray-400">ID</th>
-                                <th className="px-6 py-4 text-sm font-medium text-gray-400">Gender</th>
-                                <th className="px-6 py-4 text-sm font-medium text-gray-400">Contact</th>
-                                <th className="px-6 py-4 text-sm font-medium text-gray-400">Date of Birth</th>
-                                <th className="px-6 py-4 text-sm font-medium text-gray-400">Action</th>
+                            <tr className="bg-gray-50 dark:bg-white/5 border-b border-gray-100 dark:border-white/5">
+                                <th className="px-6 py-4 text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Patient</th>
+                                <th className="px-6 py-4 text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID</th>
+                                <th className="px-6 py-4 text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Gender</th>
+                                <th className="px-6 py-4 text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contact</th>
+                                <th className="px-6 py-4 text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date of Birth</th>
+                                <th className="px-6 py-4 text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Action</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-gray-100 dark:divide-white/5">
                             {patients.map(p => (
-                                <tr key={p._id} className="hover:bg-white/5 transition-colors group">
+                                <tr key={p._id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold shadow-inner">
+                                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold shadow-sm">
                                                 {p.userId?.name?.charAt(0).toUpperCase()}
                                             </div>
-                                            <span className="font-medium text-white group-hover:text-primary-light transition-colors">{p.userId?.name}</span>
+                                            <span className="font-bold text-gray-900 dark:text-white group-hover:text-primary transition-colors">{p.userId?.name}</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-gray-400 font-mono text-xs">
+                                    <td className="px-6 py-4 text-gray-500 dark:text-gray-400 font-mono text-xs">
                                         {p._id.slice(-6)}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded text-xs font-semibold uppercase tracking-wide border ${p.gender === 'male' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                            p.gender === 'female' ? 'bg-pink-500/10 text-pink-400 border-pink-500/20' :
-                                                'bg-gray-500/10 text-gray-400 border-gray-500/20'
+                                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${p.gender === 'male' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-500/20' :
+                                            p.gender === 'female' ? 'bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-100 dark:border-pink-500/20' :
+                                                'bg-gray-50 dark:bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-100 dark:border-gray-500/20'
                                             }`}>
                                             {p.gender}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-gray-300 text-sm">
+                                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300 text-sm">
                                         <div className="flex items-center gap-2">
-                                            <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                             </svg>
                                             {p.userId?.phone || 'N/A'}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-gray-300 text-sm">
+                                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300 text-sm font-medium">
                                         {p.dateOfBirth ? new Date(p.dateOfBirth).toLocaleDateString() : 'N/A'}
                                     </td>
                                     <td className="px-6 py-4">
                                         <Link
                                             href={`/patients/${p._id}`}
-                                            className="inline-flex items-center px-3 py-1 bg-white/5 hover:bg-primary/20 text-gray-300 hover:text-primary-light text-xs font-medium rounded-md transition-colors border border-white/10 hover:border-primary/30"
+                                            className="inline-flex items-center px-3.5 py-1.5 bg-white dark:bg-white/5 hover:bg-primary hover:dark:bg-primary text-gray-700 dark:text-gray-300 hover:text-white dark:hover:text-white text-xs font-bold rounded-lg transition-all border border-gray-200 dark:border-white/10 hover:border-primary dark:hover:border-primary shadow-sm"
                                         >
                                             View Record
                                         </Link>
@@ -138,16 +138,16 @@ export default function Patients() {
             </div>
 
             {patients.length === 0 && (
-                <div className="bg-surface rounded-2xl border border-white/5 p-12 text-center shadow-xl mt-8">
-                    <div className="mx-auto h-20 w-20 bg-white/5 rounded-full flex items-center justify-center mb-6 text-gray-600">
+                <div className="bg-white dark:bg-surface rounded-3xl border border-gray-100 dark:border-white/5 p-12 text-center shadow-xl mt-8">
+                    <div className="mx-auto h-20 w-20 bg-gray-50 dark:bg-white/5 rounded-3xl flex items-center justify-center mb-6 text-gray-400">
                         <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-2">No Patients Found</h3>
-                    <p className="text-gray-400 max-w-sm mx-auto mb-8">Get started by registering a new patient to the system.</p>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No Patients Found</h3>
+                    <p className="text-gray-500 dark:text-gray-400 max-w-sm mx-auto mb-8">Get started by registering a new patient to the system.</p>
                     <Button
-                        className="bg-primary hover:bg-primary-dark text-white shadow-lg shadow-purple-900/20"
+                        className="bg-primary hover:bg-primary-dark text-white shadow-lg shadow-primary/25"
                         onClick={() => router.push('/patients/new')}
                     >
                         Add New Patient

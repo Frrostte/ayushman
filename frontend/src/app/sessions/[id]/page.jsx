@@ -60,85 +60,94 @@ function SessionPageContent({ id }) {
 
     return (
         <div className="text-foreground max-w-5xl mx-auto">
-            <div className="flex items-center justify-between mb-8">
-                <h1 className="text-3xl md:text-4xl font-bold">
-                    Clinical <span className="text-primary">Session</span>
-                </h1>
-                <span className={`px-4 py-1.5 rounded-full text-sm font-medium border ${session ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-primary/10 text-primary border-primary/20'}`}>
-                    {session ? 'Completed' : 'In Progress'}
-                </span >
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+                <div>
+                    <h1 className="text-4xl font-black tracking-tight mb-2">
+                        Clinical <span className="text-primary font-black">Session</span>
+                    </h1>
+                    <p className="text-gray-500 dark:text-gray-400 font-medium tracking-tight">Comprehensive record of the medical encounter.</p>
+                </div>
+                <div className={`px-6 py-2 rounded-2xl text-xs font-black uppercase tracking-[0.2em] shadow-sm border ${session
+                    ? 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 border-green-100 dark:border-green-500/30'
+                    : 'bg-primary/5 dark:bg-primary/10 text-primary border-primary/10 dark:border-primary/20 animate-pulse'}`}>
+                    {session ? 'Completed' : 'Session In Progress'}
+                </div >
             </div >
 
-            <div className="grid gap-8">
+            <div className="grid gap-10">
                 {/* Patient Context Card */}
-                <div className="bg-surface border border-white/5 rounded-2xl p-6 shadow-lg">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="bg-white dark:bg-surface border border-gray-100 dark:border-white/5 rounded-[2rem] p-8 shadow-xl shadow-gray-200/20 dark:shadow-none">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
                         <div>
-                            <h3 className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-1">Patient</h3>
-                            <p className="text-xl font-bold text-white">{appointment.patientId?.userId?.name}</p>
+                            <h3 className="text-gray-400 dark:text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Patient</h3>
+                            <p className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">{appointment.patientId?.userId?.name}</p>
                         </div>
-                        <div className="h-px md:h-12 w-full md:w-px bg-white/10"></div>
+                        <div className="hidden md:block h-12 w-px bg-gray-100 dark:bg-white/10"></div>
                         <div>
-                            <h3 className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-1">Date & Time</h3>
-                            <p className="text-lg text-white">
-                                {new Date(appointment.date).toLocaleDateString()} <span className="text-gray-500">at</span> {appointment.time}
+                            <h3 className="text-gray-400 dark:text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Date & Time</h3>
+                            <p className="text-xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">
+                                {new Date(appointment.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} <span className="text-gray-400 font-medium mx-1">at</span> {appointment.time}
                             </p>
                         </div>
-                        <div className="h-px md:h-12 w-full md:w-px bg-white/10"></div>
+                        <div className="hidden md:block h-12 w-px bg-gray-100 dark:bg-white/10"></div>
                         <div>
-                            <h3 className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-1">Doctor</h3>
-                            <p className="text-lg text-white">Dr. {appointment.doctorId?.name}</p>
+                            <h3 className="text-gray-400 dark:text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Doctor</h3>
+                            <p className="text-xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">Dr. {appointment.doctorId?.name}</p>
                         </div>
                     </div>
                 </div>
 
                 {session ? (
-                    <div className="bg-surface border border-white/5 rounded-2xl overflow-hidden shadow-xl">
-                        <div className="bg-white/5 px-6 py-4 border-b border-white/5">
-                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
+                    <div className="bg-white dark:bg-surface border border-gray-100 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-2xl">
+                        <div className="bg-gray-50/50 dark:bg-white/5 px-8 py-6 border-b border-gray-100 dark:border-white/5">
+                            <h3 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3 tracking-tight">
+                                <div className="p-2 bg-primary/10 rounded-xl">
+                                    <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
                                 Session Record
                             </h3>
                         </div>
-                        <div className="p-6 space-y-6">
+                        <div className="p-8 space-y-10">
                             <div>
-                                <h4 className="text-sm font-medium text-primary mb-2">Diagnosis</h4>
-                                <p className="text-gray-200 bg-black/30 p-4 rounded-lg border border-white/5">{session.diagnosis}</p>
+                                <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-4">Diagnosis</h4>
+                                <div className="bg-gray-50 dark:bg-black/20 p-6 rounded-2xl border border-gray-100 dark:border-white/5 text-lg font-bold text-gray-900 dark:text-white leading-relaxed">
+                                    {session.diagnosis}
+                                </div>
                             </div>
 
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div>
-                                    <h4 className="text-sm font-medium text-primary mb-2">Complaints</h4>
-                                    <p className="text-gray-300">{session.complaints}</p>
+                            <div className="grid md:grid-cols-2 gap-8">
+                                <div className="bg-gray-50 dark:bg-white/5 p-6 rounded-2xl border border-gray-100 dark:border-white/5">
+                                    <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-3">Complaints</h4>
+                                    <p className="text-gray-600 dark:text-gray-400 font-medium leading-relaxed">{session.complaints}</p>
                                 </div>
-                                <div>
-                                    <h4 className="text-sm font-medium text-primary mb-2">Notes</h4>
-                                    <p className="text-gray-300">{session.notes || 'No additional notes.'}</p>
+                                <div className="bg-gray-50 dark:bg-white/5 p-6 rounded-2xl border border-gray-100 dark:border-white/5">
+                                    <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-3">Professional Notes</h4>
+                                    <p className="text-gray-600 dark:text-gray-400 font-medium leading-relaxed">{session.notes || 'No additional notes provided.'}</p>
                                 </div>
                             </div>
 
                             {session.medications && session.medications.length > 0 && (
                                 <div>
-                                    <h4 className="text-sm font-medium text-primary mb-3">Prescription</h4>
-                                    <div className="bg-black/30 rounded-lg border border-white/5 overflow-hidden">
-                                        <table className="w-full text-left text-sm text-gray-400">
-                                            <thead className="bg-white/5 text-gray-200 uppercase font-medium">
+                                    <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-5">Prescription Details</h4>
+                                    <div className="bg-gray-50 dark:bg-black/20 rounded-2xl border border-gray-100 dark:border-white/5 overflow-hidden">
+                                        <table className="w-full text-left text-sm">
+                                            <thead className="bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 uppercase text-[10px] font-black tracking-widest">
                                                 <tr>
-                                                    <th className="px-4 py-3">Medicine</th>
-                                                    <th className="px-4 py-3">Dosage</th>
-                                                    <th className="px-4 py-3">Frequency</th>
-                                                    <th className="px-4 py-3">Duration</th>
+                                                    <th className="px-6 py-4">Medicine</th>
+                                                    <th className="px-6 py-4">Dosage</th>
+                                                    <th className="px-6 py-4">Frequency</th>
+                                                    <th className="px-6 py-4">Duration</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-white/5">
+                                            <tbody className="divide-y divide-gray-100 dark:divide-white/5">
                                                 {session.medications.map((m, i) => (
-                                                    <tr key={i} className="hover:bg-white/5 transition-colors">
-                                                        <td className="px-4 py-3 font-medium text-white">{m.name}</td>
-                                                        <td className="px-4 py-3">{m.dosage}</td>
-                                                        <td className="px-4 py-3">{m.frequency}</td>
-                                                        <td className="px-4 py-3">{m.duration}</td>
+                                                    <tr key={i} className="hover:bg-white dark:hover:bg-white/5 transition-colors group">
+                                                        <td className="px-6 py-4 font-black text-gray-900 dark:text-white group-hover:text-primary transition-colors">{m.name}</td>
+                                                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400 font-medium">{m.dosage}</td>
+                                                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400 font-medium">{m.frequency}</td>
+                                                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400 font-medium">{m.duration}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -149,24 +158,33 @@ function SessionPageContent({ id }) {
                         </div>
                     </div>
                 ) : (
-                    <div className="bg-surface border border-white/5 rounded-2xl p-6 shadow-lg">
+                    <div className="bg-white dark:bg-surface border border-gray-100 dark:border-white/5 rounded-[2rem] p-8 shadow-xl">
                         {user?.role === 'patient' ? (
-                            <div className="text-center py-12">
-                                <div className="mx-auto h-16 w-16 bg-white/5 rounded-full flex items-center justify-center mb-4 text-gray-500">
-                                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <div className="text-center py-20 bg-gray-50 dark:bg-white/5 rounded-[2rem] border-2 border-dashed border-gray-200 dark:border-white/10">
+                                <div className="mx-auto h-20 w-20 bg-primary/10 rounded-3xl flex items-center justify-center mb-6 text-primary">
+                                    <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-2">Session Not Started</h3>
-                                <p className="text-gray-400">The doctor has not started this session yet. Please check back later.</p>
+                                <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">Session Not Started</h3>
+                                <p className="text-gray-500 dark:text-gray-400 font-medium">The medical professional has not initiated the session documentation yet.</p>
                             </div>
                         ) : (
                             <>
-                                <div className="border-b border-white/10 pb-4 mb-6">
-                                    <h3 className="text-xl font-bold text-white">New Session Record</h3>
-                                    <p className="text-gray-400 text-sm">Document the clinical encounter and prescribe medications.</p>
+                                <div className="border-b border-gray-100 dark:border-white/10 pb-6 mb-10 flex items-center gap-4">
+                                    <div className="p-3 bg-primary/10 rounded-2xl">
+                                        <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">New Session Record</h3>
+                                        <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">Document the clinical encounter and prescribe medical care.</p>
+                                    </div>
                                 </div>
-                                <SessionForm appointment={appointment} onSuccess={() => window.location.reload()} />
+                                <div className="bg-gray-50 dark:bg-black/10 rounded-3xl p-8 border border-gray-100 dark:border-white/5 shadow-inner">
+                                    <SessionForm appointment={appointment} onSuccess={() => window.location.reload()} />
+                                </div>
                             </>
                         )}
                     </div>

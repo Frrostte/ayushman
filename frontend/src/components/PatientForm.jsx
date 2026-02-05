@@ -96,9 +96,9 @@ export default function PatientForm({ onSuccess, initialData = null }) {
         }
     };
 
-    const inputClasses = "appearance-none rounded-lg relative block w-full px-3 py-3 bg-black/50 border border-white/10 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition-all";
-    const disabledClasses = "appearance-none rounded-lg relative block w-full px-3 py-3 bg-black/20 border border-white/5 text-gray-400 cursor-not-allowed sm:text-sm";
-    const labelClasses = "block text-sm font-medium text-gray-400 mb-1";
+    const inputClasses = "appearance-none rounded-2xl relative block w-full px-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 placeholder-gray-400 dark:placeholder-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 sm:text-sm transition-all duration-300";
+    const disabledClasses = "appearance-none rounded-2xl relative block w-full px-4 py-3 bg-gray-100/50 dark:bg-black/40 border border-gray-200 dark:border-white/5 text-gray-400 dark:text-gray-500 cursor-not-allowed sm:text-sm";
+    const labelClasses = "block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 ml-1";
 
     const canEditMedicalHistory = userRole === 'doctor';
 
@@ -132,53 +132,53 @@ export default function PatientForm({ onSuccess, initialData = null }) {
 
             <div>
                 <label className={labelClasses}>Date of Birth</label>
-                <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className={inputClasses} style={{ colorScheme: 'dark' }} />
+                <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className={inputClasses} style={{ colorScheme: 'light dark' }} />
             </div>
 
-            <div>
-                <label className={labelClasses}>Gender</label>
-                <div className="relative">
-                    <select name="gender" value={formData.gender} onChange={handleChange} className={inputClasses}>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
-                        <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
-                            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                        </svg>
+            <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label className={labelClasses}>Gender</label>
+                    <div className="relative">
+                        <select name="gender" value={formData.gender} onChange={handleChange} className={`${inputClasses} appearance-none`}>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
+                            <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div>
                 <label className={labelClasses}>Address</label>
-                <textarea name="address" value={formData.address} onChange={handleChange} className={inputClasses} rows="3" placeholder="Address"></textarea>
+                <textarea name="address" value={formData.address} onChange={handleChange} className={inputClasses} rows="3" placeholder="Primary Living Address"></textarea>
             </div>
 
-            {/* Medical Notes: Editable by Doctor ONLY, Hidden/Read-only for others? User asked to "allow edit ... apart from medical history". 
-                I will make it read-only for non-doctors to preserve the data but prevent edits.
-            */}
+            {/* Medical Notes: Editable by Doctor ONLY */}
             <div>
-                <label className={labelClasses}>Medical Notes {canEditMedicalHistory ? '' : '(Doctor Only)'}</label>
+                <label className={labelClasses}>Medical Notes {canEditMedicalHistory ? '' : '(Read Only)'}</label>
                 <textarea
                     name="medicalNotes"
                     value={formData.medicalNotes}
                     onChange={handleChange}
                     className={canEditMedicalHistory ? inputClasses : disabledClasses}
                     rows="3"
-                    placeholder="Notes"
+                    placeholder="Clinical notes and medical history..."
                     disabled={!canEditMedicalHistory}
                 ></textarea>
             </div>
 
-            <div className="pt-4">
+            <div className="pt-6">
                 <button
                     type="submit"
                     disabled={loading}
-                    className={`w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white ${loading ? 'bg-primary/50' : 'bg-primary hover:bg-primary-dark'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:ring-offset-black transition-all duration-300 shadow-[0_0_20px_-5px_rgba(124,58,237,0.5)]`}
+                    className={`w-full flex justify-center py-4 px-6 border border-transparent text-xs font-black uppercase tracking-widest rounded-2xl text-white ${loading ? 'bg-primary/50 cursor-not-allowed' : 'bg-primary hover:bg-primary-dark shadow-xl shadow-primary/20 hover:scale-[1.02]'} focus:outline-none focus:ring-4 focus:ring-primary/20 transition-all duration-300`}
                 >
-                    {loading ? 'Saving...' : (initialData ? 'Update Patient' : 'Add Patient')}
+                    {loading ? 'Processing...' : (initialData ? 'Update Clinical Record' : 'Register New Patient')}
                 </button>
             </div>
         </form>

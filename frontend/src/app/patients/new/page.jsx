@@ -9,16 +9,18 @@ export default function NewPatientPage() {
 
     return (
         <div className="text-foreground max-w-3xl mx-auto">
-                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-light to-accent mb-2">
-                            New Patient Registration
-                        </h1>
-                        <p className="text-gray-400">Enter patient details to create a new record.</p>
-                    </div>
+            <div className="mb-10">
+                <h1 className="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-light tracking-tight mb-2">
+                    New Patient Registration
+                </h1>
+                <p className="text-gray-500 dark:text-gray-400 font-medium">Enter patient details to create a new clinical record.</p>
+            </div>
 
-                    <PatientForm onSuccess={() => {
-                        router.push('/patients');
-                    }} />
-            </div >
-        </div >
-        );
+            <div className="bg-white dark:bg-surface border border-gray-100 dark:border-white/5 rounded-3xl shadow-xl p-8">
+                <PatientForm onSuccess={() => {
+                    router.push('/patients');
+                }} />
+            </div>
+        </div>
+    );
 }

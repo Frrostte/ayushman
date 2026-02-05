@@ -63,30 +63,49 @@ export default function AvailabilityPage() {
 
     return (
         <div className="text-foreground">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-2">
-                    Manage <span className="text-primary">Availability</span>
+            <div className="mb-10">
+                <h1 className="text-4xl font-black mb-2 tracking-tight">
+                    Manage <span className="text-primary font-black">Availability</span>
                 </h1>
-                <p className="text-secondary">Set your weekly schedule and manage upcoming slots.</p>
+                <p className="text-gray-500 dark:text-gray-400 font-medium tracking-tight">Set your weekly schedule and manage upcoming appointment slots.</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Form Section */}
                 <div className="lg:col-span-1">
-                    <Card>
-                        <h2 className="text-xl font-bold mb-6">Add Slots</h2>
+                    <Card className="bg-white dark:bg-surface border border-gray-100 dark:border-white/5 rounded-3xl shadow-xl p-8 sticky top-8">
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="p-2 bg-primary/10 rounded-xl">
+                                <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0h-3m-9-4h.01M9 16h.01M15 16h.01M21 16h.01M12 5h.01M12 12h.01M12 19h.01M12 7V5m0 2v2m0 5v2m0 5v2m-6-6h.01M18 12h.01" />
+                                </svg>
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Add Slots</h2>
+                        </div>
                         <AvailabilityForm onUpdate={refreshUser} />
                     </Card>
                 </div>
 
                 {/* List Section */}
                 <div className="lg:col-span-2">
-                    <Card className="h-full">
-                        <h2 className="text-xl font-bold mb-6">Upcoming Availability</h2>
+                    <Card className="h-full bg-white dark:bg-surface border border-gray-100 dark:border-white/5 rounded-3xl shadow-xl p-8">
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="p-2 bg-primary/10 rounded-xl">
+                                <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Upcoming Availability</h2>
+                        </div>
+
                         {user.availability && user.availability.length > 0 ? (
-                            <AvailabilityList availability={user.availability} onUpdate={refreshUser} />
+                            <div className="space-y-4">
+                                <AvailabilityList availability={user.availability} onUpdate={refreshUser} />
+                            </div>
                         ) : (
-                            <p className="text-gray-400">No availability set. Please add some slots.</p>
+                            <div className="text-center py-20 bg-gray-50 dark:bg-white/5 rounded-3xl border-2 border-dashed border-gray-200 dark:border-white/10">
+                                <p className="text-gray-400 font-medium italic">No availability set. Please add some slots to start receiving bookings.</p>
+                            </div>
                         )}
                     </Card>
                 </div>

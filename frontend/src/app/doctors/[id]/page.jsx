@@ -86,34 +86,34 @@ export default function DoctorProfile() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Sidebar / Profile Card */}
                 <div className="md:col-span-1">
-                    <Card className="text-center">
-                        <div className="w-32 h-32 mx-auto rounded-full bg-primary/20 flex items-center justify-center text-primary text-4xl font-bold mb-4 shadow-inner">
+                    <Card className="text-center bg-white dark:bg-surface border border-gray-100 dark:border-white/5 rounded-3xl shadow-xl p-8">
+                        <div className="w-32 h-32 mx-auto rounded-full bg-primary/10 flex items-center justify-center text-primary text-4xl font-bold mb-6 shadow-sm">
                             {doctor.name.charAt(0).toUpperCase()}
                         </div>
-                        <h1 className="text-2xl font-bold text-white mb-1">{doctor.name}</h1>
-                        <p className="text-primary-light mb-6">{doctor.specialization || 'General Physician'}</p>
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{doctor.name}</h1>
+                        <p className="text-primary font-bold mb-8 uppercase tracking-widest text-xs">{doctor.specialization || 'General Physician'}</p>
 
-                        <div className="space-y-4 text-left border-t border-white/5 pt-6">
+                        <div className="space-y-6 text-left border-t border-gray-100 dark:border-white/5 pt-8">
                             <div>
-                                <label className="text-xs text-gray-500 uppercase font-semibold">Email</label>
-                                <p className="text-gray-300">{doctor.email}</p>
+                                <label className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-widest block mb-1">Email</label>
+                                <p className="text-gray-700 dark:text-gray-300 font-medium">{doctor.email}</p>
                             </div>
                             <div>
-                                <label className="text-xs text-gray-500 uppercase font-semibold">Phone</label>
-                                <p className="text-gray-300">{doctor.phone}</p>
+                                <label className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-widest block mb-1">Phone</label>
+                                <p className="text-gray-700 dark:text-gray-300 font-medium">{doctor.phone}</p>
                             </div>
                             <div>
-                                <label className="text-xs text-gray-500 uppercase font-semibold">Joined</label>
-                                <p className="text-gray-300">{new Date(doctor.createdAt).toLocaleDateString()}</p>
+                                <label className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-widest block mb-1">Joined Date</label>
+                                <p className="text-gray-700 dark:text-gray-300 font-medium">{new Date(doctor.createdAt).toLocaleDateString()}</p>
                             </div>
                         </div>
 
                         {canEdit && (
-                            <div className="mt-6">
+                            <div className="mt-10">
                                 <Button
                                     onClick={() => setShowEdit(!showEdit)}
-                                    className={`w-full text-sm py-2.5 shadow-lg transition-all duration-300 ${showEdit
-                                        ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 ring-1 ring-red-500/20'
+                                    className={`w-full text-sm font-bold py-3.5 shadow-lg transition-all duration-300 rounded-2xl ${showEdit
+                                        ? 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 border border-red-100 dark:border-red-500/20 shadow-none'
                                         : 'bg-primary hover:bg-primary-dark text-white shadow-primary/25'
                                         }`}
                                 >
@@ -125,59 +125,74 @@ export default function DoctorProfile() {
                 </div>
 
                 {/* Main Content */}
-                <div className="md:col-span-2 space-y-6">
+                <div className="md:col-span-2 space-y-8">
                     {showEdit && (
-                        <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-2xl border border-indigo-500/30 p-8 shadow-2xl animate-fade-in mb-8 w-full relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-                            <h3 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
-                                <svg className="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
+                        <div className="bg-white dark:bg-surface rounded-3xl border border-primary/20 p-8 shadow-2xl animate-fade-in mb-8 w-full relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                            <h3 className="text-2xl font-bold mb-8 text-gray-900 dark:text-white flex items-center gap-3">
+                                <div className="p-2 bg-primary/10 rounded-xl">
+                                    <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </div>
                                 Edit Doctor Profile
                             </h3>
                             <DoctorForm initialData={doctor} onSuccess={() => { setShowEdit(false); fetchData(); }} />
                         </div>
                     )}
 
-                    <Card>
-                        <h2 className="text-xl font-bold mb-4">Professional Details</h2>
-                        <div className="grid grid-cols-2 gap-6">
-                            <div>
-                                <label className="text-xs text-gray-500 uppercase font-semibold">Specialization</label>
-                                <p className="text-gray-300 text-lg">{doctor.specialization || 'Not specified'}</p>
+                    <Card className="bg-white dark:bg-surface border border-gray-100 dark:border-white/5 rounded-3xl shadow-xl p-8">
+                        <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-white flex items-center gap-2">
+                            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            Professional Details
+                        </h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                            <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5">
+                                <label className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-widest block mb-1">Specialization</label>
+                                <p className="text-gray-900 dark:text-gray-200 font-bold text-lg">{doctor.specialization || 'Not specified'}</p>
                             </div>
-                            <div>
-                                <label className="text-xs text-gray-500 uppercase font-semibold">Experience</label>
-                                <p className="text-gray-300 text-lg">{doctor.experience ? `${doctor.experience} years` : 'Not specified'}</p>
+                            <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5">
+                                <label className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-widest block mb-1">Experience</label>
+                                <p className="text-gray-900 dark:text-gray-200 font-bold text-lg">{doctor.experience ? `${doctor.experience} years` : 'Not specified'}</p>
                             </div>
-                            <div className="col-span-2">
-                                <label className="text-xs text-gray-500 uppercase font-semibold">Qualifications</label>
-                                <p className="text-gray-300 text-lg">{doctor.qualifications || 'Not specified'}</p>
+                            <div className="col-span-full bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5">
+                                <label className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-widest block mb-1">Qualifications</label>
+                                <p className="text-gray-900 dark:text-gray-200 font-bold text-lg">{doctor.qualifications || 'Not specified'}</p>
                             </div>
                         </div>
                     </Card>
 
-                    <Card>
-                        <h2 className="text-xl font-bold mb-4">Availability Schedule</h2>
+                    <Card className="bg-white dark:bg-surface border border-gray-100 dark:border-white/5 rounded-3xl shadow-xl p-8">
+                        <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-white flex items-center gap-2">
+                            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Availability Schedule
+                        </h2>
                         {doctor.availability && doctor.availability.length > 0 ? (
-                            <div className="space-y-3">
+                            <div className="grid gap-4">
                                 {doctor.availability.sort((a, b) => new Date(a.date) - new Date(b.date)).filter(d => new Date(d.date) >= new Date()).map((slot, i) => (
-                                    <div key={i} className="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-white/5">
-                                        <div className="font-medium text-white">
+                                    <div key={i} className="flex justify-between items-center p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 hover:border-primary/30 transition-all group">
+                                        <div className="font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                                            <div className="w-2 h-2 rounded-full bg-primary ring-4 ring-primary/10"></div>
                                             {new Date(slot.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                                         </div>
-                                        <div className="text-primary-light font-mono text-sm">
+                                        <div className="px-3 py-1 bg-primary/10 text-primary font-bold text-xs rounded-full">
                                             {slot.startTime} - {slot.endTime}
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-gray-500 italic">No upcoming availability scheduled.</p>
+                            <div className="text-center py-12 bg-gray-50 dark:bg-white/5 rounded-3xl border border-dashed border-gray-200 dark:border-white/10">
+                                <p className="text-gray-500 font-medium italic">No upcoming availability scheduled.</p>
+                            </div>
                         )}
                     </Card>
                 </div>
             </div>
-        </div >
+        </div>
     );
 }
