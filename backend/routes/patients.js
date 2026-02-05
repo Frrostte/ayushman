@@ -75,7 +75,7 @@ router.post('/', auth, async (req, res) => {
 // @desc    Update patient
 // @access  Private
 router.put('/:id', auth, async (req, res) => {
-    const { dateOfBirth, gender, address, medicalNotes } = req.body;
+    const { dateOfBirth, gender, address, medicalNotes, name, email, phone } = req.body;
 
     // Build patient object
     const patientFields = {};
@@ -89,11 +89,24 @@ router.put('/:id', auth, async (req, res) => {
 
         if (!patient) return res.status(404).json({ msg: 'Patient not found' });
 
+        // Update User fields if provided
+        if (name || email || phone) {
+            const userFields = {};
+            if (name) userFields.name = name;
+            if (email) userFields.email = email;
+            if (phone) userFields.phone = phone;
+
+            await require('../models/User').findByIdAndUpdate(
+                patient.userId,
+                { $set: userFields }
+            );
+        }
+
         patient = await Patient.findByIdAndUpdate(
             req.params.id,
             { $set: patientFields },
             { new: true }
-        );
+        ).populate('userId', 'name email phone');
 
         res.json(patient);
     } catch (err) {

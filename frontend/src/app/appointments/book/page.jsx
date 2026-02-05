@@ -8,6 +8,7 @@ import Card from '../../../components/Card';
 import Select from '../../../components/Select';
 import Input from '../../../components/Input';
 import Button from '../../../components/Button';
+import Calendar from '../../../components/Calendar';
 
 export default function BookingPage() {
     const router = useRouter();
@@ -22,6 +23,7 @@ export default function BookingPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showSuccess, setShowSuccess] = useState(false);
+    const [availableDates, setAvailableDates] = useState([]);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -35,7 +37,7 @@ export default function BookingPage() {
 
         if (parsedUser.role === 'patient') {
             checkPatientProfile();
-        } else if (parsedUser.role === 'doctor') {
+        } else if (parsedUser.role === 'doctor' || parsedUser.role === 'admin') {
             fetchPatients();
         }
 
@@ -87,16 +89,52 @@ export default function BookingPage() {
         }
     };
 
-    const handleDoctorChange = (e) => {
-        setSelectedDoctor(e.target.value);
-        setSelectedSlot('');
-        fetchSlots(e.target.value, selectedDate);
+    const fetchDoctorDetails = async (doctorId) => {
+        try {
+            console.log('Fetching availability for doctor:', doctorId);
+            const res = await api.get(`/doctors/${doctorId}`);
+            console.log('Doctor details response:', res.data);
+
+            // Extract availability dates
+            if (res.data.availability && Array.isArray(res.data.availability)) {
+                // availability.date is likely a full ISO string (from backend Date type)
+                // We need YYYY-MM-DD
+                const dates = res.data.availability.map(a => {
+                    const d = new Date(a.date);
+                    const iso = d.toISOString().split('T')[0];
+                    console.log(`Original: ${a.date}, Parsed: ${iso}`);
+                    return iso;
+                });
+                console.log('Setting available dates:', dates);
+                setAvailableDates(dates);
+            } else {
+                console.log('No availability found or invalid format');
+                setAvailableDates([]);
+            }
+        } catch (err) {
+            console.error('Failed to fetch doctor details', err);
+            setAvailableDates([]);
+        }
     };
 
-    const handleDateChange = (e) => {
-        setSelectedDate(e.target.value);
+    const handleDoctorChange = (e) => {
+        const doctorId = e.target.value;
+        setSelectedDoctor(doctorId);
         setSelectedSlot('');
-        fetchSlots(selectedDoctor, e.target.value);
+        setSelectedDate(''); // Reset date when doctor changes
+        setAvailableDates([]); // Clear previous availability
+
+        if (doctorId) {
+            // We can't fetch slots yet because date isn't selected
+            // But we SHOULD fetch availability for the calendar
+            fetchDoctorDetails(doctorId);
+        }
+    };
+
+    const handleDateChange = (date) => {
+        setSelectedDate(date);
+        setSelectedSlot('');
+        fetchSlots(selectedDoctor, date);
     };
 
     const handleBooking = async (e) => {
@@ -147,7 +185,7 @@ export default function BookingPage() {
                     {error && <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-lg mb-6">{error}</div>}
 
                     <form onSubmit={handleBooking} className="space-y-6 relative z-10">
-                        {user?.role === 'doctor' && (
+                        {(user?.role === 'doctor' || user?.role === 'admin') && (
                             <div className="space-y-1">
                                 <label className="block text-sm font-medium text-gray-400">Select Patient</label>
                                 <div className="relative">
@@ -183,15 +221,20 @@ export default function BookingPage() {
                             ]}
                         />
 
-                        <Input
-                            label="Select Date"
-                            type="date"
-                            value={selectedDate}
-                            onChange={handleDateChange}
-                            min={new Date().toISOString().split('T')[0]}
-                            required
-                            style={{ colorScheme: 'dark' }}
-                        />
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-400">Select Date</label>
+                            {selectedDoctor ? (
+                                <Calendar
+                                    value={selectedDate}
+                                    onChange={handleDateChange}
+                                    availableDates={availableDates}
+                                />
+                            ) : (
+                                <div className="p-8 text-center border border-white/10 rounded-xl bg-white/5 text-gray-500">
+                                    Please select a doctor to view their availability.
+                                </div>
+                            )}
+                        </div>
 
                         {selectedDoctor && selectedDate && (
                             <div className="animate-in fade-in slide-in-from-top-4 duration-300">
@@ -251,7 +294,7 @@ export default function BookingPage() {
 
                             <Button
                                 onClick={() => {
-                                    if (user?.role === 'doctor') {
+                                    if (user?.role === 'doctor' || user?.role === 'admin') {
                                         router.push('/dashboard');
                                     } else {
                                         router.push('/patient-dashboard');

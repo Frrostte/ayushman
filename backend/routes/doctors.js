@@ -7,8 +7,8 @@ const roleCheck = require('../middleware/roleCheck');
 
 // @route   GET api/doctors
 // @desc    Get all doctors
-// @access  Private
-router.get('/', [auth, roleCheck(['admin'])], async (req, res) => {
+// @access  Private (Admin, Patient)
+router.get('/', [auth, roleCheck(['admin', 'patient'])], async (req, res) => {
     try {
         const doctors = await User.find({ role: 'doctor' }).select('-password');
         // Optional: Aggregate with Doctor model if needed, but for simple list, user info is enough.
@@ -18,11 +18,34 @@ router.get('/', [auth, roleCheck(['admin'])], async (req, res) => {
         res.status(500).send('Server Error');
     }
 });
+// @route   GET api/doctors/me
+// @desc    Get current doctor profile
+// @access  Private (Doctor only)
+router.get('/me', [auth, roleCheck(['doctor'])], async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('-password');
+        if (!user || user.role !== 'doctor') {
+            return res.status(404).json({ msg: 'Doctor profile not found' });
+        }
+
+        const doctorProfile = await Doctor.findOne({ userId: req.user.id });
+
+        const doctorData = {
+            ...user.toObject(),
+            ...doctorProfile?.toObject()
+        };
+
+        res.json(doctorData);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
 
 // @route   GET api/doctors/:id
 // @desc    Get single doctor by ID (User ID)
-// @access  Private (Admin only)
-router.get('/:id', [auth, roleCheck(['admin'])], async (req, res) => {
+// @access  Private (Admin, Doctor, Patient)
+router.get('/:id', [auth, roleCheck(['admin', 'doctor', 'patient'])], async (req, res) => {
     try {
         const user = await User.findById(req.params.id).select('-password');
         if (!user || user.role !== 'doctor') {
@@ -43,6 +66,65 @@ router.get('/:id', [auth, roleCheck(['admin'])], async (req, res) => {
         if (err.kind === 'ObjectId') {
             return res.status(404).json({ msg: 'Doctor not found' });
         }
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   PUT api/doctors/:id
+// @desc    Update doctor profile
+// @access  Private (Admin, Doctor)
+router.put('/:id', [auth, roleCheck(['admin', 'doctor'])], async (req, res) => {
+    const {
+        name, email, phone,
+        specialization, experience, qualifications
+    } = req.body;
+
+    try {
+        let user = await User.findById(req.params.id);
+        if (!user || user.role !== 'doctor') {
+            return res.status(404).json({ msg: 'Doctor not found' });
+        }
+
+        // Check permission: Admin or same user
+        if (req.user.role !== 'admin' && req.user.id !== req.params.id) {
+            return res.status(403).json({ msg: 'Not authorized to update this profile' });
+        }
+
+        // Update User fields
+        const userFields = {};
+        if (name) userFields.name = name;
+        if (email) userFields.email = email;
+        if (phone) userFields.phone = phone;
+
+        if (Object.keys(userFields).length > 0) {
+            await User.findByIdAndUpdate(req.params.id, { $set: userFields });
+        }
+
+        // Update Doctor fields
+        const doctorFields = {};
+        if (specialization) doctorFields.specialization = specialization;
+        if (experience) doctorFields.experience = experience;
+        if (qualifications) doctorFields.qualifications = qualifications;
+
+        let doctor = await Doctor.findOne({ userId: req.params.id });
+        if (!doctor) {
+            // Create if not exists (though unlikely for existing doctor)
+            doctor = new Doctor({ userId: req.params.id, availability: [], ...doctorFields });
+            await doctor.save();
+        } else {
+            doctor = await Doctor.findOneAndUpdate(
+                { userId: req.params.id },
+                { $set: doctorFields },
+                { new: true }
+            );
+        }
+
+        // Return combined data
+        const updatedUser = await User.findById(req.params.id).select('-password');
+        res.json({ ...updatedUser.toObject(), ...doctor.toObject() });
+
+    } catch (err) {
+        console.error(err.message);
         res.status(500).send('Server Error');
     }
 });
@@ -135,6 +217,7 @@ router.post('/availability/bulk', [auth, roleCheck(['doctor', 'admin'])], async 
             doctor.availability = [];
         }
 
+        let count = 0;
         let currentDate = new Date(start);
 
         // Loop through dates
@@ -160,14 +243,26 @@ router.post('/availability/bulk', [auth, roleCheck(['doctor', 'admin'])], async 
                     endTime,
                     slotDuration: slotDuration || 30
                 });
+                count++;
             }
 
             // Next day
             currentDate.setDate(currentDate.getDate() + 1);
         }
 
+        console.log('Saving availability for doctor:', doctor.userId);
+        console.log('Availability count before save:', doctor.availability.length);
+
         await doctor.save();
-        res.json({ msg: 'Bulk availability updated successfully', availability: doctor.availability });
+
+        console.log('Doctor saved successfully.');
+        console.log('Returning availability count:', doctor.availability.length);
+
+        if (count === 0) {
+            return res.json({ msg: 'No slots added. The selected date range does not contain the chosen days.', availability: doctor.availability, count: 0 });
+        }
+
+        res.json({ msg: `Successfully added availability for ${count} days`, availability: doctor.availability });
 
     } catch (err) {
         console.error('SERVER ERROR in POST /availability/bulk:', err);

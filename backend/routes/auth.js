@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Doctor = require('../models/Doctor');
 const auth = require('../middleware/auth');
 
 // @route   POST api/auth/register
@@ -100,7 +101,21 @@ router.post('/login', async (req, res) => {
 router.get('/user', auth, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
-        res.json(user);
+
+        let userData = user.toObject();
+
+        if (user.role === 'doctor') {
+            const doctorProfile = await Doctor.findOne({ userId: req.user.id });
+            if (doctorProfile) {
+                console.log('Merging doctor profile for user:', user._id);
+                userData = { ...userData, ...doctorProfile.toObject() };
+                console.log('Availability count:', userData.availability ? userData.availability.length : 0);
+            } else {
+                console.log('No doctor profile found for user:', user._id);
+            }
+        }
+
+        res.json(userData);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');

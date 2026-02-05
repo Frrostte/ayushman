@@ -1,52 +1,34 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Navbar from '../../../components/Navbar';
-import api from '../../../lib/api';
-import Card from '../../../components/Card';
-import Button from '../../../components/Button';
-import DoctorForm from '../../../components/DoctorForm';
+import Navbar from '../../components/Navbar';
+import api from '../../lib/api';
+import Card from '../../components/Card';
+import Button from '../../components/Button';
+import DoctorForm from '../../components/DoctorForm';
+import { useRouter } from 'next/navigation';
 
-export default function DoctorProfile() {
-    const { id } = useParams();
+export default function MyProfile() {
     const router = useRouter();
     const [doctor, setDoctor] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showEdit, setShowEdit] = useState(false);
-    const [canEdit, setCanEdit] = useState(false);
 
     const fetchData = async () => {
         try {
-            const res = await api.get(`/doctors/${id}`);
+            const res = await api.get('/doctors/me');
             setDoctor(res.data);
-
-            // Check if current user can edit
-            try {
-                const userRes = await api.get('/auth/user');
-                const currentUser = userRes.data;
-                if (currentUser.role === 'admin' || String(currentUser._id) === String(id)) {
-                    setCanEdit(true);
-                }
-            } catch (e) {
-                console.error("Error checking permissions", e);
-            }
-
         } catch (err) {
             console.error(err);
-            if (err.response?.status === 404) {
-                // Instead of alert, we could redirect or show inline error
-                // router.push('/doctors'); // Redirecting might be confusing if it loops
-                setDoctor(null); // Will show nothing or we can add an error state
-            }
+            // If failed (e.g. not a doctor), redirect or show error
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        if (id) fetchData();
-    }, [id]);
+        fetchData();
+    }, []);
 
     if (loading) {
         return (
@@ -61,13 +43,8 @@ export default function DoctorProfile() {
             <div className="min-h-screen bg-background flex flex-col items-center justify-center text-white px-4">
                 <Navbar />
                 <div className="text-center">
-                    <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                    </div>
-                    <h2 className="text-2xl font-bold mb-2">Doctor Not Found</h2>
-                    <p className="text-gray-400 mb-6">The doctor profile you are looking for does not exist or you don't have permission to view it.</p>
+                    <h2 className="text-2xl font-bold mb-2">Profile Not Found</h2>
+                    <p className="text-gray-400 mb-6">Unable to load your doctor profile.</p>
                     <Button onClick={() => router.push('/dashboard')}>Back to Dashboard</Button>
                 </div>
             </div>
@@ -77,15 +54,15 @@ export default function DoctorProfile() {
     return (
         <div className="min-h-screen bg-background text-white selection:bg-primary selection:text-white">
             <Navbar />
-            <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
                 <Button
-                    onClick={() => router.back()}
+                    onClick={() => router.push('/dashboard')}
                     className="mb-8 bg-transparent text-gray-400 hover:text-white pl-0 flex items-center gap-2"
                 >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Back to Doctors
+                    Back to Dashboard
                 </Button>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -113,19 +90,17 @@ export default function DoctorProfile() {
                                 </div>
                             </div>
 
-                            {canEdit && (
-                                <div className="mt-6">
-                                    <Button
-                                        onClick={() => setShowEdit(!showEdit)}
-                                        className={`w-full text-sm py-2.5 shadow-lg transition-all duration-300 ${showEdit
-                                            ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 ring-1 ring-red-500/20'
-                                            : 'bg-primary hover:bg-primary-dark text-white shadow-primary/25'
-                                            }`}
-                                    >
-                                        {showEdit ? 'Cancel Editing' : 'Edit Profile'}
-                                    </Button>
-                                </div>
-                            )}
+                            <div className="mt-6">
+                                <Button
+                                    onClick={() => setShowEdit(!showEdit)}
+                                    className={`w-full text-sm py-2.5 shadow-lg transition-all duration-300 ${showEdit
+                                        ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 ring-1 ring-red-500/20'
+                                        : 'bg-primary hover:bg-primary-dark text-white shadow-primary/25'
+                                        }`}
+                                >
+                                    {showEdit ? 'Cancel Editing' : 'Edit Profile'}
+                                </Button>
+                            </div>
                         </Card>
                     </div>
 
@@ -138,7 +113,7 @@ export default function DoctorProfile() {
                                     <svg className="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
-                                    Edit Doctor Profile
+                                    Edit Your Profile
                                 </h3>
                                 <DoctorForm initialData={doctor} onSuccess={() => { setShowEdit(false); fetchData(); }} />
                             </div>
@@ -160,26 +135,6 @@ export default function DoctorProfile() {
                                     <p className="text-gray-300 text-lg">{doctor.qualifications || 'Not specified'}</p>
                                 </div>
                             </div>
-                        </Card>
-
-                        <Card>
-                            <h2 className="text-xl font-bold mb-4">Availability Schedule</h2>
-                            {doctor.availability && doctor.availability.length > 0 ? (
-                                <div className="space-y-3">
-                                    {doctor.availability.sort((a, b) => new Date(a.date) - new Date(b.date)).filter(d => new Date(d.date) >= new Date()).map((slot, i) => (
-                                        <div key={i} className="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-white/5">
-                                            <div className="font-medium text-white">
-                                                {new Date(slot.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                                            </div>
-                                            <div className="text-primary-light font-mono text-sm">
-                                                {slot.startTime} - {slot.endTime}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-gray-500 italic">No upcoming availability scheduled.</p>
-                            )}
                         </Card>
                     </div>
                 </div>

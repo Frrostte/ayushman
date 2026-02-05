@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../lib/api';
 
 export default function PatientForm({ onSuccess, initialData = null }) {
@@ -17,6 +17,19 @@ export default function PatientForm({ onSuccess, initialData = null }) {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [userRole, setUserRole] = useState(null);
+
+    // Check user role on mount
+    // Check user role on mount
+    useEffect(() => {
+        const checkRole = async () => {
+            try {
+                const res = await api.get('/auth/user');
+                setUserRole(res.data.role);
+            } catch (e) { console.error(e); }
+        };
+        checkRole();
+    }, []);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -56,6 +69,9 @@ export default function PatientForm({ onSuccess, initialData = null }) {
 
             if (initialData) {
                 await api.put(`/patients/${initialData._id}`, {
+                    name: formData.name,
+                    email: formData.email,
+                    phone: formData.phone,
                     dateOfBirth: formData.dateOfBirth,
                     gender: formData.gender,
                     address: formData.address,
@@ -81,7 +97,10 @@ export default function PatientForm({ onSuccess, initialData = null }) {
     };
 
     const inputClasses = "appearance-none rounded-lg relative block w-full px-3 py-3 bg-black/50 border border-white/10 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition-all";
+    const disabledClasses = "appearance-none rounded-lg relative block w-full px-3 py-3 bg-black/20 border border-white/5 text-gray-400 cursor-not-allowed sm:text-sm";
     const labelClasses = "block text-sm font-medium text-gray-400 mb-1";
+
+    const canEditMedicalHistory = userRole === 'doctor';
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -91,31 +110,23 @@ export default function PatientForm({ onSuccess, initialData = null }) {
                 </div>
             )}
 
-            {!initialData && (
-                <>
-                    <div>
-                        <label className={labelClasses}>Name</label>
-                        <input type="text" name="name" value={formData.name} onChange={handleChange} required className={inputClasses} placeholder="Patient Name" />
-                    </div>
-                    <div>
-                        <label className={labelClasses}>Email</label>
-                        <input type="email" name="email" value={formData.email} onChange={handleChange} required className={inputClasses} placeholder="Email" />
-                    </div>
-                    <div>
-                        <label className={labelClasses}>Phone</label>
-                        <input type="text" name="phone" value={formData.phone} onChange={handleChange} required className={inputClasses} placeholder="Phone" />
-                    </div>
-                    <div>
-                        <label className={labelClasses}>Password (for patient login)</label>
-                        <input type="text" name="password" value={formData.password} onChange={handleChange} required className={inputClasses} placeholder="Temporary Password" />
-                    </div>
-                </>
-            )}
+            <div>
+                <label className={labelClasses}>Name</label>
+                <input type="text" name="name" value={formData.name} onChange={handleChange} required className={inputClasses} placeholder="Patient Name" />
+            </div>
+            <div>
+                <label className={labelClasses}>Email</label>
+                <input type="email" name="email" value={formData.email} onChange={handleChange} required className={inputClasses} placeholder="Email" />
+            </div>
+            <div>
+                <label className={labelClasses}>Phone</label>
+                <input type="text" name="phone" value={formData.phone} onChange={handleChange} required className={inputClasses} placeholder="Phone" />
+            </div>
 
-            {initialData && (
+            {!initialData && (
                 <div>
-                    <label className={labelClasses}>Name (Read Only)</label>
-                    <input type="text" value={formData.name} disabled className={`${inputClasses} opacity-50 cursor-not-allowed`} />
+                    <label className={labelClasses}>Password (for patient login)</label>
+                    <input type="text" name="password" value={formData.password} onChange={handleChange} required className={inputClasses} placeholder="Temporary Password" />
                 </div>
             )}
 
@@ -145,9 +156,20 @@ export default function PatientForm({ onSuccess, initialData = null }) {
                 <textarea name="address" value={formData.address} onChange={handleChange} className={inputClasses} rows="3" placeholder="Address"></textarea>
             </div>
 
+            {/* Medical Notes: Editable by Doctor ONLY, Hidden/Read-only for others? User asked to "allow edit ... apart from medical history". 
+                I will make it read-only for non-doctors to preserve the data but prevent edits.
+            */}
             <div>
-                <label className={labelClasses}>Medical Notes</label>
-                <textarea name="medicalNotes" value={formData.medicalNotes} onChange={handleChange} className={inputClasses} rows="3" placeholder="Notes"></textarea>
+                <label className={labelClasses}>Medical Notes {canEditMedicalHistory ? '' : '(Doctor Only)'}</label>
+                <textarea
+                    name="medicalNotes"
+                    value={formData.medicalNotes}
+                    onChange={handleChange}
+                    className={canEditMedicalHistory ? inputClasses : disabledClasses}
+                    rows="3"
+                    placeholder="Notes"
+                    disabled={!canEditMedicalHistory}
+                ></textarea>
             </div>
 
             <div className="pt-4">

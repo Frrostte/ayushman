@@ -70,7 +70,9 @@ export default function Dashboard() {
 
     const refreshUser = async () => {
         try {
+            console.log('Refreshing user data...');
             const res = await api.get('/auth/user');
+            console.log('User refreshed. Availability:', res.data.availability?.length);
             setUser(res.data);
         } catch (e) { console.error(e); }
     };
@@ -151,34 +153,62 @@ export default function Dashboard() {
                             </Link>
                         </Card>
                     )}
+                    {/* Quick Actions Card */}
+                    <Card className="group hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.3)] relative overflow-hidden flex flex-col justify-center">
+                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <svg className="w-24 h-24 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-gray-400 font-medium mb-4">Quick Actions</h3>
+
+                        <div className="space-y-3 relative z-10">
+                            <Link href="/profile" className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 hover:border-primary/30 transition-all group/item">
+                                <span className="text-gray-200 group-hover/item:text-white">Edit Profile</span>
+                                <svg className="w-4 h-4 text-gray-400 group-hover/item:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </Link>
+
+                            <Link href="/patients" className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 hover:border-primary/30 transition-all group/item">
+                                <span className="text-gray-200 group-hover/item:text-white">All Patients</span>
+                                <svg className="w-4 h-4 text-gray-400 group-hover/item:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                            </Link>
+                        </div>
+                    </Card>
+
                 </div>
 
                 {/* Availability Section - Only for Doctors */}
-                {user?.role === 'doctor' && (
-                    <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Form Section */}
-                        <div className="lg:col-span-1">
-                            <Card>
-                                <h2 className="text-xl font-bold mb-6">Manage Availability</h2>
-                                <AvailabilityForm onUpdate={refreshUser} />
-                            </Card>
-                        </div>
+                {
+                    user?.role === 'doctor' && (
+                        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            {/* Form Section */}
+                            <div className="lg:col-span-1">
+                                <Card>
+                                    <h2 className="text-xl font-bold mb-6">Manage Availability</h2>
+                                    <AvailabilityForm onUpdate={refreshUser} />
+                                </Card>
+                            </div>
 
-                        {/* List Section */}
-                        <div className="lg:col-span-2">
-                            <Card className="h-full">
-                                <h2 className="text-xl font-bold mb-6">Upcoming Availability</h2>
-                                {user?.availability && user.availability.length > 0 ? (
-                                    <AvailabilityList availability={user.availability} onUpdate={refreshUser} />
-                                ) : (
-                                    <p className="text-gray-400">No availability set. Please add some slots.</p>
-                                )}
-                            </Card>
+                            {/* List Section */}
+                            <div className="lg:col-span-2">
+                                <Card className="h-full">
+                                    <h2 className="text-xl font-bold mb-6">Upcoming Availability</h2>
+                                    {user?.availability && user.availability.length > 0 ? (
+                                        <AvailabilityList availability={user.availability} onUpdate={refreshUser} />
+                                    ) : (
+                                        <p className="text-gray-400">No availability set. Please add some slots.</p>
+                                    )}
+                                </Card>
+                            </div>
                         </div>
-                    </div>
-                )}
-            </main>
-        </div>
+                    )
+                }
+            </main >
+        </div >
     );
 }
 
@@ -236,13 +266,18 @@ function AvailabilityForm({ onUpdate }) {
                 slotDuration: parseInt(formData.slotDuration)
             };
 
-            await api.post('/doctors/availability/bulk', payload);
-            setMsg('Availability added successfully!');
+            const res = await api.post('/doctors/availability/bulk', payload);
 
-            if (onUpdate) onUpdate();
+            setMsg(res.data.msg);
+            // If count is 0 (or undefined/null which shouldn't happen with new backend), show warning style
+            if (res.data.count === 0) {
+                // Warning style handled in render
+            } else {
+                if (onUpdate) onUpdate();
+            }
 
             // Clear msg after 3s
-            setTimeout(() => setMsg(''), 3000);
+            setTimeout(() => setMsg(''), 5000); // Increased duration for reading
 
         } catch (err) {
             console.error(err);
@@ -255,7 +290,10 @@ function AvailabilityForm({ onUpdate }) {
     return (
         <div className="space-y-4">
             <form onSubmit={handleSubmit} className="space-y-4">
-                {msg && <div className={`p-3 rounded text-sm ${msg.includes('successfully') ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>{msg}</div>}
+                {msg && <div className={`p-3 rounded text-sm ${msg.toLowerCase().includes('failed') || msg.toLowerCase().includes('error') ? 'bg-red-500/20 text-red-400' :
+                    msg.includes('No slots added') ? 'bg-yellow-500/20 text-yellow-400' :
+                        'bg-green-500/20 text-green-400'
+                    }`}>{msg}</div>}
 
                 <div className="grid grid-cols-2 gap-3">
                     <Input

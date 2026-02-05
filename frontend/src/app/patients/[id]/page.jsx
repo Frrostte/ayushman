@@ -15,7 +15,7 @@ export default function PatientDetails({ params }) {
     const [showEdit, setShowEdit] = useState(false);
 
     const router = useRouter();
-    
+
     const { id } = params;
 
     const fetchData = async () => {
@@ -104,18 +104,15 @@ export default function PatientDetails({ params }) {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3 mt-6">
-                                <Button
-                                    onClick={() => router.push('/appointments/book')}
-                                    className="text-sm py-2 shadow-lg shadow-purple-900/20"
-                                >
-                                    Book Appointment
-                                </Button>
+                            <div className="mt-6">
                                 <Button
                                     onClick={() => setShowEdit(!showEdit)}
-                                    className={`text-sm py-2 ${showEdit ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20' : 'bg-white/5 hover:bg-white/10 text-white border border-white/10'}`}
+                                    className={`w-full text-sm py-2.5 shadow-lg transition-all duration-300 ${showEdit
+                                            ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 ring-1 ring-red-500/20'
+                                            : 'bg-primary hover:bg-primary-dark text-white shadow-primary/25'
+                                        }`}
                                 >
-                                    {showEdit ? 'Cancel' : 'Edit Profile'}
+                                    {showEdit ? 'Cancel Editing' : 'Edit Profile'}
                                 </Button>
                             </div>
                         </div>
@@ -124,8 +121,14 @@ export default function PatientDetails({ params }) {
                     {/* Right Column: Forms & History */}
                     <div className="lg:col-span-2 space-y-8">
                         {showEdit && (
-                            <div className="bg-surface rounded-2xl border border-white/5 p-6 shadow-xl animate-fade-in mb-8">
-                                <h3 className="text-xl font-bold mb-6 text-white">Edit Patient Profile</h3>
+                            <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-2xl border border-indigo-500/30 p-8 shadow-2xl animate-fade-in mb-8 w-full relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                                <h3 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
+                                    <svg className="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                    Edit Patient Profile
+                                </h3>
                                 <PatientForm initialData={patient} onSuccess={() => { setShowEdit(false); fetchData(); }} />
                             </div>
                         )}
