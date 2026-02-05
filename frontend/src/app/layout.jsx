@@ -1,8 +1,7 @@
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '../components/ThemeProvider';
-import ThemeToggle from '../components/ThemeToggle';
-
+import LayoutWrapper from '../components/LayoutWrapper';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata = {
@@ -15,10 +14,9 @@ export default function RootLayout({ children }) {
         <html lang="en">
             <body className={`${inter.variable} font-sans bg-background text-foreground min-h-screen antialiased`}>
                 <ThemeProvider>
-                    <div className="fixed top-24 right-4 z-50">
-                        <ThemeToggle />
-                    </div>
-                    {children}
+                    <LayoutWrapper>
+                        {children}
+                    </LayoutWrapper>
                 </ThemeProvider>
             </body>
         </html>

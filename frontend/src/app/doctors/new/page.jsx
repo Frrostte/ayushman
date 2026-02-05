@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Navbar from '../../../components/Navbar';
+
 import api from '../../../lib/api';
 import Button from '../../../components/Button';
 import Input from '../../../components/Input';
@@ -53,65 +53,62 @@ export default function NewDoctor() {
     };
 
     return (
-        <div className="min-h-screen bg-background text-white selection:bg-primary selection:text-white">
-            <Navbar />
-            <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-2xl mx-auto">
-                <Card>
-                    <h1 className="text-3xl font-bold mb-6">Add New Doctor</h1>
+        <div className="text-foreground max-w-2xl mx-auto">
+            <Card>
+                <h1 className="text-3xl font-bold mb-6">Add New Doctor</h1>
 
-                    {error && (
-                        <div className="bg-red-500/10 border border-red-500/50 text-red-500 px-4 py-3 rounded-lg mb-6 text-sm">
-                            {error}
-                        </div>
-                    )}
+                {error && (
+                    <div className="bg-red-500/10 border border-red-500/50 text-red-500 px-4 py-3 rounded-lg mb-6 text-sm">
+                        {error}
+                    </div>
+                )}
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <Input
-                            label="Full Name"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            required
-                        />
-                        <Input
-                            label="Email Address"
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                        />
-                        <Input
-                            label="Phone Number"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleChange}
-                            required
-                        />
-                        <Input
-                            label="Password"
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                        />
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <Input
+                        label="Full Name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                    />
+                    <Input
+                        label="Email Address"
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                    />
+                    <Input
+                        label="Phone Number"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        required
+                    />
+                    <Input
+                        label="Password"
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        required
+                    />
 
-                        <div className="pt-4 flex gap-4">
-                            <Button
-                                type="button"
-                                className="bg-transparent border border-gray-600 hover:border-gray-500 text-gray-300 w-full"
-                                onClick={() => router.back()}
-                            >
-                                Cancel
-                            </Button>
-                            <Button type="submit" isLoading={loading} className="w-full">
-                                Create Doctor Account
-                            </Button>
-                        </div>
-                    </form>
-                </Card>
-            </main>
+                    <div className="pt-4 flex gap-4">
+                        <Button
+                            type="button"
+                            className="bg-transparent border border-gray-600 hover:border-gray-500 text-gray-300 w-full"
+                            onClick={() => router.back()}
+                        >
+                            Cancel
+                        </Button>
+                        <Button type="submit" isLoading={loading} className="w-full">
+                            Create Doctor Account
+                        </Button>
+                    </div>
+                </form>
+            </Card>
         </div>
     );
 }
