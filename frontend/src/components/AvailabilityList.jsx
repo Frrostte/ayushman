@@ -129,7 +129,7 @@ export default function AvailabilityList({ availability, onUpdate }) {
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => startEdit(slot)}
-                                        className="p-2.5 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                                        className="p-2.5 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all md:opacity-0 md:group-hover:opacity-100"
                                         title="Edit Hours"
                                     >
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -138,7 +138,7 @@ export default function AvailabilityList({ availability, onUpdate }) {
                                     </button>
                                     <button
                                         onClick={() => confirmDelete(isoDate)}
-                                        className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                                        className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all md:opacity-0 md:group-hover:opacity-100"
                                         title="Remove Availability"
                                     >
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

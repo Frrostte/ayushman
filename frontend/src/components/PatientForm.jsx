@@ -111,33 +111,33 @@ export default function PatientForm({ onSuccess, initialData = null }) {
             )}
 
             <div>
-                <label className={labelClasses}>Name</label>
+                <label className={labelClasses}>Name*</label>
                 <input type="text" name="name" value={formData.name} onChange={handleChange} required className={inputClasses} placeholder="Patient Name" />
             </div>
             <div>
-                <label className={labelClasses}>Email</label>
+                <label className={labelClasses}>Email*</label>
                 <input type="email" name="email" value={formData.email} onChange={handleChange} required className={inputClasses} placeholder="Email" />
             </div>
             <div>
-                <label className={labelClasses}>Phone</label>
+                <label className={labelClasses}>Phone*</label>
                 <input type="text" name="phone" value={formData.phone} onChange={handleChange} required className={inputClasses} placeholder="Phone" />
             </div>
 
             {!initialData && (
                 <div>
-                    <label className={labelClasses}>Password (for patient login)</label>
+                    <label className={labelClasses}>Password* (for patient login)</label>
                     <input type="text" name="password" value={formData.password} onChange={handleChange} required className={inputClasses} placeholder="Temporary Password" />
                 </div>
             )}
 
             <div>
-                <label className={labelClasses}>Date of Birth</label>
+                <label className={labelClasses}>Date of Birth*</label>
                 <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className={inputClasses} style={{ colorScheme: 'light dark' }} />
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                    <label className={labelClasses}>Gender</label>
+                    <label className={labelClasses}>Gender*</label>
                     <div className="relative">
                         <select name="gender" value={formData.gender} onChange={handleChange} className={`${inputClasses} appearance-none`}>
                             <option value="male">Male</option>
@@ -154,7 +154,7 @@ export default function PatientForm({ onSuccess, initialData = null }) {
             </div>
 
             <div>
-                <label className={labelClasses}>Address</label>
+                <label className={labelClasses}>Address*</label>
                 <textarea name="address" value={formData.address} onChange={handleChange} className={inputClasses} rows="3" placeholder="Primary Living Address"></textarea>
             </div>
 
