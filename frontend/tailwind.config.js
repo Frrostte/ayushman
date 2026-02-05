@@ -5,19 +5,23 @@ module.exports = {
         "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
         "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     ],
+    darkMode: 'class',
     theme: {
         extend: {
             colors: {
-                background: '#0a0a0a', // Deep black
-                surface: '#121212', // Slightly lighter for cards
+                background: 'rgb(var(--background) / <alpha-value>)',
+                foreground: 'rgb(var(--foreground) / <alpha-value>)',
+                surface: 'rgb(var(--surface) / <alpha-value>)',
                 primary: {
-                    DEFAULT: '#7c3aed', // Violet 600
-                    dark: '#5b21b6', // Violet 800
+                    DEFAULT: 'rgb(var(--primary) / <alpha-value>)',
+                    dark: '#5b21b6', // Violet 800 - Consider variable if needed
                     light: '#a78bfa', // Violet 400
-                    glow: 'rgba(124, 58, 237, 0.5)' // For glow effects
+                    foreground: 'rgb(var(--primary-foreground) / <alpha-value>)',
+                    glow: 'rgba(124, 58, 237, 0.5)'
                 },
-                secondary: '#a1a1aa', // Zinc 400
-                accent: '#c084fc', // Purple 400
+                secondary: '#a1a1aa',
+                accent: '#c084fc',
+                border: 'rgb(var(--border) / <alpha-value>)',
             },
             backgroundImage: {
                 'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

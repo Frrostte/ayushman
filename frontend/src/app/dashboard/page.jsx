@@ -86,14 +86,14 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-background text-white selection:bg-primary selection:text-white">
+        <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-white">
             <Navbar />
             <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
                 <div className="mb-12">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                        Welcome, <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-light to-accent">{user?.name}</span>
+                        Welcome, <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">{user?.name}</span>
                     </h1>
-                    <p className="text-gray-400 text-lg">Here's what's happening in your clinic today.</p>
+                    <p className="text-secondary text-lg">Here's what's happening in your clinic today.</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -104,9 +104,9 @@ export default function Dashboard() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                         </div>
-                        <h3 className="text-gray-400 font-medium mb-2">Total Patients</h3>
-                        <p className="text-5xl font-bold text-white mb-6">{stats.patients}</p>
-                        <Link href="/patients" className="inline-flex items-center text-primary-light hover:text-white transition-colors group-hover:translate-x-1 duration-300">
+                        <h3 className="text-secondary font-medium mb-2">Total Patients</h3>
+                        <p className="text-5xl font-bold text-foreground mb-6">{stats.patients}</p>
+                        <Link href="/patients" className="inline-flex items-center text-primary hover:text-foreground transition-colors group-hover:translate-x-1 duration-300">
                             Manage Patients
                             <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -123,11 +123,11 @@ export default function Dashboard() {
                         </div>
                         <div className="flex items-center gap-2 mb-2">
                             <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-                            <h3 className="text-gray-400 font-medium">Today's Appointments</h3>
+                            <h3 className="text-secondary font-medium">Today's Appointments</h3>
                         </div>
 
-                        <p className="text-5xl font-bold text-white mb-6">{stats.appointments}</p>
-                        <Link href="/appointments" className="inline-flex items-center text-primary-light hover:text-white transition-colors group-hover:translate-x-1 duration-300">
+                        <p className="text-5xl font-bold text-foreground mb-6">{stats.appointments}</p>
+                        <Link href="/appointments" className="inline-flex items-center text-primary hover:text-foreground transition-colors group-hover:translate-x-1 duration-300">
                             View Schedule
                             <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -153,31 +153,33 @@ export default function Dashboard() {
                             </Link>
                         </Card>
                     )}
-                    {/* Quick Actions Card */}
-                    <Card className="group hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.3)] relative overflow-hidden flex flex-col justify-center">
-                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <svg className="w-24 h-24 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                        </div>
-                        <h3 className="text-gray-400 font-medium mb-4">Quick Actions</h3>
-
-                        <div className="space-y-3 relative z-10">
-                            <Link href="/profile" className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 hover:border-primary/30 transition-all group/item">
-                                <span className="text-gray-200 group-hover/item:text-white">Edit Profile</span>
-                                <svg className="w-4 h-4 text-gray-400 group-hover/item:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    {/* Quick Actions Card - Doctors Only */}
+                    {user?.role === 'doctor' && (
+                        <Card className="group hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.3)] relative overflow-hidden flex flex-col justify-center">
+                            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <svg className="w-24 h-24 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
-                            </Link>
+                            </div>
+                            <h3 className="text-secondary font-medium mb-4">Quick Actions</h3>
 
-                            <Link href="/patients" className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 hover:border-primary/30 transition-all group/item">
-                                <span className="text-gray-200 group-hover/item:text-white">All Patients</span>
-                                <svg className="w-4 h-4 text-gray-400 group-hover/item:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                            </Link>
-                        </div>
-                    </Card>
+                            <div className="space-y-3 relative z-10">
+                                <Link href="/profile" className="flex items-center justify-between p-3 rounded-lg bg-surface hover:bg-white/5 border border-border hover:border-primary/30 transition-all group/item">
+                                    <span className="text-foreground group-hover/item:text-primary transition-colors">Edit Profile</span>
+                                    <svg className="w-4 h-4 text-secondary group-hover/item:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </Link>
+
+                                <Link href="/patients" className="flex items-center justify-between p-3 rounded-lg bg-surface hover:bg-white/5 border border-border hover:border-primary/30 transition-all group/item">
+                                    <span className="text-foreground group-hover/item:text-primary transition-colors">All Patients</span>
+                                    <svg className="w-4 h-4 text-secondary group-hover/item:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </Link>
+                            </div>
+                        </Card>
+                    )}
 
                 </div>
 
@@ -519,21 +521,21 @@ function AvailabilityList({ availability, onUpdate }) {
                 onClose={() => setDeleteDate(null)}
                 title="Remove Availability"
                 footer={
-                    <>
+                    <div className="grid grid-cols-2 gap-4 w-full">
                         <button
                             onClick={() => setDeleteDate(null)}
-                            className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors"
+                            className="w-full px-4 py-2 text-sm text-secondary hover:text-foreground border border-border rounded-lg transition-colors"
                         >
                             Cancel
                         </button>
                         <Button
                             onClick={executeDelete}
-                            className="w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white shadow-none"
+                            className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white shadow-none"
                             style={{ padding: '0.5rem 1rem' }}
                         >
                             Confirm
                         </Button>
-                    </>
+                    </div>
                 }
             >
                 <p>Are you sure you want to remove your availability for <strong>{deleteDate}</strong>?</p>

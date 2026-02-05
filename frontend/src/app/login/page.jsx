@@ -52,10 +52,10 @@ export default function Login() {
         <div className="min-h-screen flex items-center justify-center bg-background px-4 sm:px-6 lg:px-8">
             <Card className="max-w-md w-full">
                 <div>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
+                    <h2 className="mt-6 text-center text-3xl font-extrabold text-foreground">
                         AYUSHMAN LOGIN
                     </h2>
-                    <p className="mt-2 text-center text-sm text-gray-400">
+                    <p className="mt-2 text-center text-sm text-secondary">
                         Access your dashboard
                     </p>
                 </div>
@@ -89,12 +89,12 @@ export default function Login() {
                                     value={formData.password}
                                     onChange={handleChange}
                                     placeholder="Password"
-                                    className="appearance-none rounded-lg relative block w-full px-3 py-3 bg-black/50 border border-white/10 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition-all pr-10"
+                                    className="appearance-none rounded-lg relative block w-full px-3 py-3 bg-surface border border-border placeholder-secondary text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition-all pr-10"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute inset-y-0 right-0 max-h-min my-auto pr-3 flex items-center text-gray-400 hover:text-white transition-colors focus:outline-none"
+                                    className="absolute inset-y-0 right-0 max-h-min my-auto pr-3 flex items-center text-secondary hover:text-foreground transition-colors focus:outline-none"
                                 >
                                     {showPassword ? (
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -118,8 +118,8 @@ export default function Login() {
                     </div>
                 </form>
                 <div className="text-center mt-4">
-                    <p className="text-sm text-gray-400">
-                        New User? <Link href="/register" className="font-medium text-primary-light hover:text-white transition-colors">Register here</Link>
+                    <p className="text-sm text-secondary">
+                        New User? <Link href="/register" className="font-medium text-primary hover:text-primary-dark transition-colors">Register here</Link>
                     </p>
                 </div>
             </Card>
