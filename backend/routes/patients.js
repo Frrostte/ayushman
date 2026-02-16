@@ -11,8 +11,35 @@ const roleCheck = require('../middleware/roleCheck');
 // @access  Private (Doctor only)
 router.get('/', [auth, roleCheck(['doctor', 'admin'])], async (req, res) => {
     try {
-        const patients = await Patient.find().populate('userId', 'name email phone').sort({ createdAt: -1 });
-        res.json(patients);
+        const patients = await Patient.find()
+            .populate('userId', 'name email phone role')
+            .sort({ createdAt: -1 });
+
+        console.log('--- GET /patients DEBUG (Explicit Filter) ---');
+        console.log(`Raw Patient docs found: ${patients.length}`);
+
+        const truePatients = patients.filter(p => {
+            if (!p.userId) {
+                console.log(`[FILTER] Patient ID: ${p._id} - Dropped (No User populated)`);
+                return false;
+            }
+
+            const { name, role } = p.userId;
+            const isPatient = role === 'patient';
+
+            console.log(`[FILTER] Checking: ${name} (Role: ${role}) -> ${isPatient ? 'PASS' : 'FAIL'}`);
+
+            if (!isPatient) {
+                // console.log(`Filtering out Patient ID: ${p._id} linked to ${p.userId.name} - Role is: '${role}'`);
+            }
+
+            return isPatient;
+        });
+
+        console.log(`Returning ${truePatients.length} patients`);
+        console.log('-------------------------------------------');
+
+        res.json(truePatients);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');

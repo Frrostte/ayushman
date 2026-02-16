@@ -4,16 +4,29 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import ThemeToggle from './ThemeToggle';
+import api from '../lib/api';
 
 export default function Sidebar({ isOpen, setIsOpen }) {
     const pathname = usePathname();
     const [user, setUser] = useState(null);
 
     useEffect(() => {
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-            setUser(JSON.parse(userStr));
-        }
+        const fetchUser = async () => {
+            try {
+                const res = await api.get('/auth/user');
+                setUser(res.data);
+                localStorage.setItem('user', JSON.stringify(res.data));
+            } catch (err) {
+                console.error('Failed to fetch user in sidebar', err);
+                // Fallback to local storage if API fails
+                const userStr = localStorage.getItem('user');
+                if (userStr) {
+                    setUser(JSON.parse(userStr));
+                }
+            }
+        };
+
+        fetchUser();
     }, []);
 
     const isActive = (path) => pathname === path;
@@ -123,8 +136,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                             {user?.name?.[0] || 'D'}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-gray-900 dark:text-white truncate tracking-tight">{user?.name || 'Dr. User'}</p>
-                            <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate font-medium">{user?.email || 'doctor@clinic.com'}</p>
+                            <p className="text-sm font-bold text-gray-900 dark:text-white truncate tracking-tight">{user?.name || 'User'}</p>
+                            <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate font-medium">{user?.email || 'Loading...'}</p>
                         </div>
                         <button
                             onClick={() => {

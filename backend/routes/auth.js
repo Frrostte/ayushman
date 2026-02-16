@@ -45,7 +45,7 @@ router.post('/register', async (req, res) => {
             { expiresIn: process.env.JWT_EXPIRE },
             (err, token) => {
                 if (err) throw err;
-                res.json({ token, user: { id: user.id, name: user.name, role: user.role } });
+                res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
             }
         );
     } catch (err) {
@@ -86,7 +86,7 @@ router.post('/login', async (req, res) => {
             { expiresIn: process.env.JWT_EXPIRE },
             (err, token) => {
                 if (err) throw err;
-                res.json({ token, user: { id: user.id, name: user.name, role: user.role } });
+                res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
             }
         );
     } catch (err) {
