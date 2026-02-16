@@ -61,8 +61,6 @@ router.get('/:id', auth, async (req, res) => {
 router.post('/', auth, async (req, res) => {
     const {
         appointmentId,
-        patientId,
-        doctorId,
         complaints,
         diagnosis,
         notes,
@@ -70,10 +68,18 @@ router.post('/', auth, async (req, res) => {
     } = req.body;
 
     try {
+        // Fetch appointment to get patientId and verify it exists
+        const Appointment = require('../models/Appointment');
+        const appointment = await Appointment.findById(appointmentId);
+        
+        if (!appointment) {
+            return res.status(404).json({ msg: 'Appointment not found' });
+        }
+
         const newSession = new Session({
             appointmentId,
-            patientId,
-            doctorId,
+            patientId: appointment.patientId,
+            doctorId: req.user.id,
             complaints,
             diagnosis,
             notes,

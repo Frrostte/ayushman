@@ -13,4 +13,10 @@ const appointmentSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
+// Prevent double booking: unique doctor, date, and time, unless cancelled
+appointmentSchema.index({ doctorId: 1, date: 1, time: 1 }, {
+    unique: true,
+    partialFilterExpression: { status: { $ne: 'cancelled' } }
+});
+
 module.exports = mongoose.model('Appointment', appointmentSchema);
