@@ -84,8 +84,7 @@ export default function Register() {
                         onChange={handleChange}
                         options={[
                             { value: 'doctor', label: 'Doctor' },
-                            { value: 'patient', label: 'Patient' },
-                            { value: 'admin', label: 'Admin' }
+                            { value: 'patient', label: 'Patient' }
                         ]}
                     />
                     <Input
