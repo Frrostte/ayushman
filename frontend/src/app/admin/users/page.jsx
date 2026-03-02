@@ -6,6 +6,8 @@ import api from '../../../lib/api';
 import Link from 'next/link';
 import Card from '../../../components/Card';
 import Button from '../../../components/Button';
+import Input from '../../../components/Input';
+import Select from '../../../components/Select';
 
 export default function UsersList() {
     const router = useRouter();
@@ -13,18 +15,29 @@ export default function UsersList() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
 
+    // Edit Modal State
+    const [editingUser, setEditingUser] = useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editFormData, setEditFormData] = useState({
+        name: '', email: '', phone: '', role: '', password: ''
+    });
+    const [editError, setEditError] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
+
+    const fetchUsers = async () => {
+        setIsLoading(true);
+        try {
+            const res = await api.get('/users');
+            setUsers(res.data);
+        } catch (err) {
+            console.error('Failed to fetch users:', err);
+            setError('Failed to load users. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const res = await api.get('/users');
-                setUsers(res.data);
-            } catch (err) {
-                console.error('Failed to fetch users:', err);
-                setError('Failed to load users. Please try again.');
-            } finally {
-                setIsLoading(false);
-            }
-        };
 
         const checkAdmin = () => {
             const userStr = localStorage.getItem('user');
@@ -42,6 +55,45 @@ export default function UsersList() {
 
         checkAdmin();
     }, [router]);
+
+    const openEditModal = (user) => {
+        setEditingUser(user);
+        setEditFormData({
+            name: user.name || '',
+            email: user.email || '',
+            phone: user.phone || '',
+            role: user.role || 'patient',
+            password: '' // Keep empty, only send if changing
+        });
+        setEditError('');
+        setIsEditModalOpen(true);
+    };
+
+    const handleEditChange = (e) => {
+        setEditFormData({ ...editFormData, [e.target.name]: e.target.value });
+    };
+
+    const handleEditSubmit = async (e) => {
+        e.preventDefault();
+        setEditError('');
+        setIsSaving(true);
+
+        try {
+            // Only send password if it's not empty
+            const dataToUpdate = { ...editFormData };
+            if (!dataToUpdate.password) {
+                delete dataToUpdate.password;
+            }
+
+            await api.put(`/users/${editingUser._id}`, dataToUpdate);
+            setIsEditModalOpen(false);
+            fetchUsers(); // Refresh list to get updated data
+        } catch (err) {
+            setEditError(err.response?.data?.msg || 'Failed to update user');
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     const getRoleBadgeColor = (role) => {
         switch (role) {
@@ -98,7 +150,8 @@ export default function UsersList() {
                                 <th className="p-6 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 w-1/3">User Details</th>
                                 <th className="p-6 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 w-1/4">Role</th>
                                 <th className="p-6 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 w-1/4">Contact</th>
-                                <th className="p-6 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 w-1/4">Joined</th>
+                                <th className="p-6 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 w-[15%]">Joined</th>
+                                <th className="p-6 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 w-[10%] text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-white/5">
@@ -132,11 +185,22 @@ export default function UsersList() {
                                             day: 'numeric'
                                         })}
                                     </td>
+                                    <td className="p-6 text-right">
+                                        <button
+                                            onClick={() => openEditModal(u)}
+                                            className="p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-xl transition-all"
+                                            title="Edit User"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
                             {users.length === 0 && (
                                 <tr>
-                                    <td colSpan="4" className="p-12 text-center text-gray-500 dark:text-gray-400">
+                                    <td colSpan="5" className="p-12 text-center text-gray-500 dark:text-gray-400">
                                         <div className="flex flex-col items-center gap-3">
                                             <svg className="w-12 h-12 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -150,6 +214,104 @@ export default function UsersList() {
                     </table>
                 </div>
             </Card>
+
+            {/* Edit User Modal */}
+            {isEditModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsEditModalOpen(false)} />
+                    <Card className="relative w-full max-w-2xl bg-white dark:bg-surface shadow-2xl rounded-3xl overflow-hidden animate-slide-up">
+                        <div className="px-8 py-6 border-b border-gray-100 dark:border-white/5 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
+                            <div>
+                                <h3 className="text-xl font-black text-gray-900 dark:text-white">Edit User details</h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Updating profile for {editingUser?.name}</p>
+                            </div>
+                            <button
+                                onClick={() => setIsEditModalOpen(false)}
+                                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl transition-all"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleEditSubmit} className="p-8">
+                            {editError && (
+                                <div className="mb-6 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/50 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm font-bold">
+                                    {editError}
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <Input
+                                    label="Full Name"
+                                    name="name"
+                                    value={editFormData.name}
+                                    onChange={handleEditChange}
+                                    required
+                                />
+                                <Input
+                                    label="Email Address"
+                                    type="email"
+                                    name="email"
+                                    value={editFormData.email}
+                                    onChange={handleEditChange}
+                                    required
+                                />
+                                <Input
+                                    label="Phone Number"
+                                    name="phone"
+                                    value={editFormData.phone}
+                                    onChange={handleEditChange}
+                                    required
+                                />
+                                <Select
+                                    label="Role"
+                                    name="role"
+                                    value={editFormData.role}
+                                    onChange={handleEditChange}
+                                    options={[
+                                        { value: 'doctor', label: 'Doctor' },
+                                        { value: 'admin', label: 'Administrator' },
+                                        { value: 'patient', label: 'Patient' }
+                                    ]}
+                                />
+                                <div className="md:col-span-2">
+                                    <Input
+                                        label="New Password (Optional)"
+                                        type="password"
+                                        name="password"
+                                        value={editFormData.password}
+                                        onChange={handleEditChange}
+                                        placeholder="Leave blank to keep current password"
+                                    />
+                                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium ml-1">
+                                        Only enter a password if you wish to overwrite the users current login credentials.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="mt-8 flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-white/5">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setIsEditModalOpen(false)}
+                                    className="px-6 border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    isLoading={isSaving}
+                                    className="px-8 shadow-xl shadow-primary/20"
+                                >
+                                    Save Changes
+                                </Button>
+                            </div>
+                        </form>
+                    </Card>
+                </div>
+            )}
         </div>
     );
 }
