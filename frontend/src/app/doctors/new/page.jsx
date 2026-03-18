@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import api from '../../../lib/api';
@@ -10,6 +10,19 @@ import Card from '../../../components/Card';
 
 export default function NewDoctor() {
     const router = useRouter();
+
+    useEffect(() => {
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+            router.push('/login');
+            return;
+        }
+        const user = JSON.parse(userStr);
+        if (user.role !== 'admin') {
+            router.push('/dashboard');
+        }
+    }, [router]);
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',

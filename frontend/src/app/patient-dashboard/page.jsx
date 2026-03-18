@@ -35,7 +35,12 @@ export default function PatientDashboard() {
         }
 
         if (userStr) {
-            setUser(JSON.parse(userStr));
+            const parsedUser = JSON.parse(userStr);
+            if (parsedUser.role !== 'patient') {
+                router.push('/dashboard');
+                return;
+            }
+            setUser(parsedUser);
         }
 
         const fetchData = async () => {

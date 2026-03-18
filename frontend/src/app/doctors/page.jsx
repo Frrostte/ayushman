@@ -13,6 +13,12 @@ export default function Doctors() {
     const router = useRouter();
 
     useEffect(() => {
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+            router.push('/login');
+            return;
+        }
+
         const fetchDoctors = async () => {
             try {
                 const res = await api.get('/doctors');
@@ -25,7 +31,7 @@ export default function Doctors() {
             }
         };
         fetchDoctors();
-    }, []);
+    }, [router]);
 
     if (loading) {
         return (

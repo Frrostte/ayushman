@@ -45,8 +45,14 @@ export default function DoctorProfile() {
     };
 
     useEffect(() => {
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+            router.push('/login');
+            return;
+        }
+
         if (id) fetchData();
-    }, [id]);
+    }, [id, router]);
 
     if (loading) {
         return (
