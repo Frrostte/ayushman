@@ -35,8 +35,14 @@ export default function PatientDetails({ params }) {
     };
 
     useEffect(() => {
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+            router.push('/login');
+            return;
+        }
+
         fetchData();
-    }, [id]);
+    }, [id, router]);
 
     if (loading) {
         return (

@@ -16,11 +16,24 @@ export default function MyProfile() {
 
     const fetchData = async () => {
         try {
+            const userStr = localStorage.getItem('user');
+            if (!userStr) {
+                router.push('/login');
+                return;
+            }
+            const user = JSON.parse(userStr);
+            if (user.role !== 'doctor') {
+                router.push('/dashboard');
+                return;
+            }
+
             const res = await api.get('/doctors/me');
             setDoctor(res.data);
         } catch (err) {
             console.error(err);
-            // If failed (e.g. not a doctor), redirect or show error
+            if (err.response && err.response.status === 401) {
+                router.push('/login');
+            }
         } finally {
             setLoading(false);
         }
