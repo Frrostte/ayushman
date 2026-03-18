@@ -35,8 +35,14 @@ export default function PatientDetails({ params }) {
     };
 
     useEffect(() => {
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+            router.push('/login');
+            return;
+        }
+
         fetchData();
-    }, [id]);
+    }, [id, router]);
 
     if (loading) {
         return (
@@ -110,7 +116,7 @@ export default function PatientDetails({ params }) {
                             <Button
                                 onClick={() => setShowEdit(!showEdit)}
                                 className={`w-full text-sm font-bold py-3.5 shadow-lg transition-all duration-300 rounded-2xl ${showEdit
-                                    ? 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 border border-red-100 dark:border-red-500/20 shadow-none'
+                                    ? 'bg-red-500 hover:bg-red-600 text-white shadow-red-500/25'
                                     : 'bg-primary hover:bg-primary-dark text-white shadow-primary/25'
                                     }`}
                             >

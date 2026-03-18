@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 import SessionForm from '../../../components/SessionForm';
 import api from '../../../lib/api';
@@ -15,10 +16,15 @@ function SessionPageContent({ id }) {
     const [session, setSession] = useState(null);
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
+    const router = useRouter();
 
     useEffect(() => {
         const userStr = localStorage.getItem('user');
-        if (userStr) setUser(JSON.parse(userStr));
+        if (!userStr) {
+            router.push('/login');
+            return;
+        }
+        setUser(JSON.parse(userStr));
 
         const init = async () => {
             try {
@@ -37,7 +43,7 @@ function SessionPageContent({ id }) {
             }
         };
         init();
-    }, [id]);
+    }, [id, router]);
 
     if (loading) {
         return (

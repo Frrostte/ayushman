@@ -16,13 +16,13 @@ export default function PrescriptionForm({ medications, setMedications }) {
         setMedications(newMeds);
     };
 
-    const inputClasses = "appearance-none rounded-lg relative block w-full px-3 py-2 bg-black/50 border border-white/10 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm transition-all";
-    const labelClasses = "block text-xs font-medium text-gray-400 mb-1";
+    const inputClasses = "appearance-none rounded-lg relative block w-full px-3 py-2 bg-white dark:bg-black/50 border border-gray-200 dark:border-white/10 placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm transition-all";
+    const labelClasses = "block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1";
 
     return (
-        <div className="mt-8 border-t border-white/10 pt-6">
+        <div className="mt-8 border-t border-gray-200 dark:border-white/10 pt-6">
             <div className="flex items-center justify-between mb-4">
-                <h4 className="text-lg font-semibold text-white">Prescription</h4>
+                <h4 className="text-lg font-semibold text-gray-900 dark:text-white">Prescription</h4>
                 <button type="button" onClick={addMedication} className="text-sm text-primary hover:text-primary-light font-medium flex items-center gap-1 transition-colors">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -33,7 +33,7 @@ export default function PrescriptionForm({ medications, setMedications }) {
 
             <div className="space-y-4">
                 {medications.map((med, index) => (
-                    <div key={index} className="grid grid-cols-12 gap-3 items-end bg-white/5 p-4 rounded-xl border border-white/5 relative group">
+                    <div key={index} className="grid grid-cols-12 gap-3 items-end bg-gray-50 dark:bg-white/5 p-4 rounded-xl border border-gray-200 dark:border-white/5 relative group">
                         <div className="col-span-12 sm:col-span-4">
                             <label className={labelClasses}>Medicine Name</label>
                             <input
@@ -90,7 +90,7 @@ export default function PrescriptionForm({ medications, setMedications }) {
                     </div>
                 ))}
                 {medications.length === 0 && (
-                    <p className="text-sm text-gray-500 italic text-center py-4 bg-white/5 rounded-lg border border-dashed border-white/10">
+                    <p className="text-sm text-gray-500 italic text-center py-4 bg-gray-50 dark:bg-white/5 rounded-lg border border-dashed border-gray-300 dark:border-white/10">
                         No medications added. Click "Add Medication" to prescribe.
                     </p>
                 )}

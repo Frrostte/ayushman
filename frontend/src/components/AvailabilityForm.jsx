@@ -86,10 +86,10 @@ export default function AvailabilityForm({ onUpdate }) {
             <form onSubmit={handleSubmit} className="space-y-6">
                 {msg && (
                     <div className={`p-4 rounded-2xl text-xs font-bold uppercase tracking-widest text-center border animate-fade-in ${msg.toLowerCase().includes('failed') || msg.toLowerCase().includes('error')
-                            ? 'bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-500/50 text-red-600 dark:text-red-400' :
-                            msg.includes('No slots added')
-                                ? 'bg-yellow-50 dark:bg-yellow-500/10 border-yellow-100 dark:border-yellow-500/50 text-yellow-600 dark:text-yellow-400' :
-                                'bg-green-50 dark:bg-green-500/10 border-green-100 dark:border-green-500/50 text-green-600 dark:text-green-400'
+                        ? 'bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-500/50 text-red-600 dark:text-red-400' :
+                        msg.includes('No slots added')
+                            ? 'bg-yellow-50 dark:bg-yellow-500/10 border-yellow-100 dark:border-yellow-500/50 text-yellow-600 dark:text-yellow-400' :
+                            'bg-green-50 dark:bg-green-500/10 border-green-100 dark:border-green-500/50 text-green-600 dark:text-green-400'
                         }`}>
                         {msg}
                     </div>
@@ -103,7 +103,6 @@ export default function AvailabilityForm({ onUpdate }) {
                         onChange={e => setFormData({ ...formData, startDate: e.target.value })}
                         min={new Date().toISOString().split('T')[0]}
                         required
-                        style={{ colorScheme: 'light dark' }}
                     />
                     <Input
                         label="End Date"
@@ -112,7 +111,6 @@ export default function AvailabilityForm({ onUpdate }) {
                         onChange={e => setFormData({ ...formData, endDate: e.target.value })}
                         min={new Date().toISOString().split('T')[0]}
                         required
-                        style={{ colorScheme: 'light dark' }}
                     />
                 </div>
 
@@ -142,7 +140,6 @@ export default function AvailabilityForm({ onUpdate }) {
                         type="time"
                         value={formData.startTime}
                         onChange={e => setFormData({ ...formData, startTime: e.target.value })}
-                        style={{ colorScheme: 'light dark' }}
                         required
                     />
                     <Input
@@ -150,7 +147,6 @@ export default function AvailabilityForm({ onUpdate }) {
                         type="time"
                         value={formData.endTime}
                         onChange={e => setFormData({ ...formData, endTime: e.target.value })}
-                        style={{ colorScheme: 'light dark' }}
                         required
                     />
                 </div>

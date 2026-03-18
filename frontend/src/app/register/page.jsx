@@ -76,52 +76,47 @@ export default function Register() {
                         {error}
                     </div>
                 )}
-                <form className="space-y-5" onSubmit={handleSubmit}>
-                    <Select
-                        label="Register As"
-                        name="role"
-                        value={formData.role}
-                        onChange={handleChange}
-                        options={[
-                            { value: 'doctor', label: 'Doctor' },
-                            { value: 'patient', label: 'Patient' }
-                        ]}
-                    />
+                <form className="space-y-5" onSubmit={handleSubmit} autoComplete="off">
+
                     <Input
-                        label="Full Name"
+                        label="Full Name*"
                         type="text"
                         name="name"
                         required
                         value={formData.name}
                         onChange={handleChange}
                         placeholder="Your full name"
+                        autoComplete="off"
                     />
                     <Input
-                        label="Email Address"
+                        label="Email Address*"
                         type="email"
                         name="email"
                         required
                         value={formData.email}
                         onChange={handleChange}
                         placeholder="Enter your email"
+                        autoComplete="off"
                     />
                     <Input
-                        label="Phone Number"
+                        label="Phone Number*"
                         type="text"
                         name="phone"
                         required
                         value={formData.phone}
                         onChange={handleChange}
                         placeholder="10-digit number"
+                        autoComplete="off"
                     />
                     <Input
-                        label="Password"
+                        label="Password*"
                         type="password"
                         name="password"
                         required
                         value={formData.password}
                         onChange={handleChange}
                         placeholder="Create a password"
+                        autoComplete="new-password"
                     />
 
                     <div className="pt-4">

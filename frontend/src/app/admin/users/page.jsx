@@ -244,14 +244,14 @@ export default function UsersList() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <Input
-                                    label="Full Name"
+                                    label="Full Name*"
                                     name="name"
                                     value={editFormData.name}
                                     onChange={handleEditChange}
                                     required
                                 />
                                 <Input
-                                    label="Email Address"
+                                    label="Email Address*"
                                     type="email"
                                     name="email"
                                     value={editFormData.email}
@@ -259,7 +259,7 @@ export default function UsersList() {
                                     required
                                 />
                                 <Input
-                                    label="Phone Number"
+                                    label="Phone Number*"
                                     name="phone"
                                     value={editFormData.phone}
                                     onChange={handleEditChange}
@@ -292,18 +292,17 @@ export default function UsersList() {
                             </div>
 
                             <div className="mt-8 flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-white/5">
-                                <Button
+                                <button
                                     type="button"
-                                    variant="outline"
                                     onClick={() => setIsEditModalOpen(false)}
-                                    className="px-6 border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+                                    className="px-4 py-3 w-full flex justify-center text-sm rounded-lg font-bold bg-red-500 hover:bg-red-600 text-white transition-all shadow-[0_0_20px_-5px_rgba(239,68,68,0.5)] items-center"
                                 >
                                     Cancel
-                                </Button>
+                                </button>
                                 <Button
                                     type="submit"
                                     isLoading={isSaving}
-                                    className="px-8 shadow-xl shadow-primary/20"
+                                    className="px-8 shadow-[0_0_20px_-5px_rgba(124,58,237,0.5)] text-sm"
                                 >
                                     Save Changes
                                 </Button>
