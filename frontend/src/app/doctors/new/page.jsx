@@ -69,51 +69,51 @@ export default function NewDoctor() {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <Input
-                            label="Full Name"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            required
-                        />
-                        <Input
-                            label="Email Address"
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+                    <Input
+                        label="Full Name*"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                    />
 
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <Input
-                            label="Phone Number"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleChange}
-                            required
-                        />
-                        <Input
-                            label="Password"
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+                    <Input
+                        label="Phone Number*"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        required
+                    />
+
+                    <Input
+                        label="Email Address*"
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        autoComplete="off"
+                        required
+                    />
+
+                    <Input
+                        label="Password*"
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        autoComplete="new-password"
+                        required
+                    />
 
                     <div className="pt-8 flex flex-col md:flex-row gap-4">
-                        <Button
+                        <button
                             type="button"
-                            className="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 w-full hover:bg-gray-200 hover:text-gray-900 transition-all py-4 text-xs font-bold uppercase tracking-widest rounded-2xl"
+                            className="bg-red-500 hover:bg-red-600 text-white w-full transition-all py-4 text-sm font-bold tracking-widest rounded-2xl shadow-lg shadow-red-500/25"
                             onClick={() => router.back()}
                         >
                             Cancel
-                        </Button>
-                        <Button type="submit" isLoading={loading} className="w-full py-4 text-xs font-bold uppercase tracking-widest shadow-xl shadow-primary/10 hover:scale-[1.02] transition-transform rounded-2xl">
+                        </button>
+                        <Button type="submit" isLoading={loading} className="w-full py-4 text-sm font-bold tracking-widest shadow-xl shadow-primary/10 hover:scale-[1.02] transition-transform rounded-2xl">
                             Create Professional Account
                         </Button>
                     </div>

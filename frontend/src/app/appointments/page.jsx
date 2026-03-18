@@ -189,18 +189,18 @@ export default function Appointments() {
                                 Are you sure you want to cancel this appointment? This action cannot be undone.
                             </p>
                             <div className="flex gap-3 justify-center">
-                                <Button
+                                <button
                                     onClick={() => setShowDeleteModal(false)}
-                                    className="bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-white border-transparent w-full py-2.5 rounded-xl font-bold"
+                                    className="bg-gray-100 hover:bg-gray-200 dark:bg-black dark:hover:bg-white/5 text-gray-700 dark:text-gray-300 border-transparent w-full py-2.5 rounded-xl font-bold transition-colors"
                                 >
                                     No, Keep It
-                                </Button>
-                                <Button
+                                </button>
+                                <button
                                     onClick={handleDelete}
-                                    className="bg-red-500 hover:bg-red-600 text-white w-full py-2.5 rounded-xl font-bold shadow-lg shadow-red-500/25"
+                                    className="bg-red-500 hover:bg-red-600 text-white w-full py-2.5 rounded-xl font-bold shadow-lg shadow-red-500/25 transition-all"
                                 >
                                     Yes, Cancel
-                                </Button>
+                                </button>
                             </div>
                         </div>
                     </div>

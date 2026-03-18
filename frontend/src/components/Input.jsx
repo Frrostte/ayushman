@@ -2,7 +2,7 @@ export default function Input({ label, error, className = '', ...props }) {
     return (
         <div className={className}>
             {label && (
-                <label className="block text-sm font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">
+                <label className="block text-sm font-bold text-gray-500 dark:text-gray-400 mb-1 tracking-wider">
                     {label}
                 </label>
             )}

@@ -128,7 +128,7 @@ export default function NewUser() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Input
-                            label="Full Name"
+                            label="Full Name*"
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
@@ -147,16 +147,17 @@ export default function NewUser() {
                             ]}
                         />
                         <Input
-                            label="Email Address"
+                            label="Email Address*"
                             type="email"
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
                             required
                             placeholder="john@example.com"
+                            autoComplete="off"
                         />
                         <Input
-                            label="Phone Number"
+                            label="Phone Number*"
                             name="phone"
                             value={formData.phone}
                             onChange={handleChange}
@@ -165,13 +166,14 @@ export default function NewUser() {
                         />
                         <div className="md:col-span-2">
                             <Input
-                                label="Temporary Password"
+                                label="Password*"
                                 type="password"
                                 name="password"
                                 value={formData.password}
                                 onChange={handleChange}
                                 required
                                 placeholder="Min. 6 characters"
+                                autoComplete="new-password"
                             />
                             <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium ml-1">
                                 The user will use this password to log in for the first time.

@@ -44,8 +44,8 @@ export default function SessionForm({ appointment, onSuccess }) {
         }
     };
 
-    const inputClasses = "appearance-none rounded-lg relative block w-full px-3 py-3 bg-black/50 border border-white/10 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition-all";
-    const labelClasses = "block text-sm font-medium text-gray-400 mb-1";
+    const inputClasses = "appearance-none rounded-lg relative block w-full px-3 py-3 bg-white dark:bg-black/50 border border-gray-200 dark:border-white/10 placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition-all";
+    const labelClasses = "block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1";
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
