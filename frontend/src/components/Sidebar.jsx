@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import ThemeToggle from './ThemeToggle';
 import api from '../lib/api';
 
-export default function Sidebar({ isOpen, setIsOpen }) {
+export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed }) {
     const pathname = usePathname();
     const [user, setUser] = useState(null);
 
@@ -85,13 +85,28 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
     return (
         <>
-            <aside className={`fixed left-0 top-0 h-full w-64 bg-white dark:bg-surface border-r border-gray-100 dark:border-white/5 flex flex-col justify-between z-40 transition-transform duration-300 md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:flex shadow-xl shadow-gray-200/20 dark:shadow-none`}>
-                {/* Logo Section */}
-                <div className="p-8">
-                    <h1 className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-light tracking-tighter">
-                        AYUSHMAN
-                    </h1>
-                    <p className="text-[10px] text-gray-400 dark:text-gray-500 tracking-[0.2em] mt-1 font-bold">CLINIC MANAGEMENT</p>
+            <aside className={`fixed left-0 top-0 h-full bg-white dark:bg-surface border-r border-gray-100 dark:border-white/5 flex flex-col justify-between z-40 transition-all duration-300 md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:flex shadow-xl shadow-gray-200/20 dark:shadow-none ${isCollapsed ? 'w-20' : 'w-64'}`}>
+                {/* Logo Section & Toggle */}
+                <div className={`p-6 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+                    {!isCollapsed && (
+                        <div>
+                            <h1 className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-light tracking-tighter">
+                                AYUSHMAN
+                            </h1>
+                            <p className="text-[10px] text-gray-400 dark:text-gray-500 tracking-[0.2em] mt-1 font-bold">CLINIC MaNaGeMeNT</p>
+                        </div>
+                    )}
+                    <button
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        className="hidden md:flex p-1.5 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
+                        title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+                    >
+                        {isCollapsed ? (
+                            <svg className="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+                        ) : (
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" /></svg>
+                        )}
+                    </button>
                 </div>
 
                 {/* Navigation */}
@@ -117,45 +132,50 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                 key={item.name}
                                 href={item.href}
                                 onClick={handleNavClick}
+                                title={isCollapsed ? item.name : ''}
                                 className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group ${active
                                     ? 'bg-primary/10 text-primary font-bold shadow-sm shadow-primary/5'
                                     : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-primary'
-                                    }`}
+                                    } ${isCollapsed ? 'justify-center !px-0' : ''}`}
                             >
                                 <span className={`${active ? 'text-primary' : 'text-gray-400 group-hover:text-primary transition-colors'}`}>
                                     {item.icon}
                                 </span>
-                                <span className="text-sm tracking-tight">{item.name}</span>
+                                {!isCollapsed && <span className="text-sm tracking-tight">{item.name}</span>}
                             </Link>
                         )
                     })}
                 </nav>
 
                 {/* Bottom Actions */}
-                <div className="p-6 border-t border-gray-100 dark:border-white/5 space-y-8">
+                <div className={`p-6 border-t border-gray-100 dark:border-white/5 space-y-8 ${isCollapsed ? 'flex flex-col items-center !px-2' : ''}`}>
 
                     {/* Theme Toggle */}
-                    <div className="flex items-center justify-between px-3 py-3 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 shadow-inner">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Theme</span>
+                    <div className={`flex items-center bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 shadow-inner ${isCollapsed ? 'justify-center p-2' : 'justify-between px-3 py-3'}`}>
+                        {!isCollapsed && <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Theme</span>}
                         <ThemeToggle />
                     </div>
 
                     {/* User Profile */}
-                    <div className="flex items-center gap-3 p-2 group cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 rounded-2xl transition-all">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold shadow-sm group-hover:scale-105 transition-transform">
+                    <div className={`flex items-center p-2 group rounded-2xl transition-all ${isCollapsed ? 'flex-col gap-4' : 'gap-3 hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer'}`}>
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex-shrink-0 flex items-center justify-center text-primary font-bold shadow-sm group-hover:scale-105 transition-transform">
                             {user?.name?.[0] || 'D'}
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-gray-900 dark:text-white truncate tracking-tight">{user?.name || 'User'}</p>
-                            <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate font-medium">{user?.email || 'Loading...'}</p>
-                        </div>
+
+                        {!isCollapsed && (
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-bold text-gray-900 dark:text-white truncate tracking-tight">{user?.name || 'User'}</p>
+                                <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate font-medium">{user?.email || 'Loading...'}</p>
+                            </div>
+                        )}
+
                         <button
                             onClick={() => {
                                 localStorage.removeItem('token');
                                 localStorage.removeItem('user');
                                 window.location.href = '/login';
                             }}
-                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
+                            className={`p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all ${isCollapsed ? 'w-full flex justify-center' : ''}`}
                             title="Logout"
                         >
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

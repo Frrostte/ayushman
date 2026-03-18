@@ -96,8 +96,8 @@ export default function PatientForm({ onSuccess, initialData = null }) {
         }
     };
 
-    const inputClasses = "appearance-none rounded-2xl relative block w-full px-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 placeholder-gray-400 dark:placeholder-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 sm:text-sm transition-all duration-300";
-    const disabledClasses = "appearance-none rounded-2xl relative block w-full px-4 py-3 bg-gray-100/50 dark:bg-black/40 border border-gray-200 dark:border-white/5 text-gray-400 dark:text-gray-500 cursor-not-allowed sm:text-sm";
+    const inputClasses = "rounded-2xl relative block w-full px-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 placeholder-gray-400 dark:placeholder-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 sm:text-sm transition-all duration-300";
+    const disabledClasses = "rounded-2xl relative block w-full px-4 py-3 bg-gray-100/50 dark:bg-black/40 border border-gray-200 dark:border-white/5 text-gray-400 dark:text-gray-500 cursor-not-allowed sm:text-sm";
     const labelClasses = "block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 ml-1";
 
     const canEditMedicalHistory = userRole === 'doctor';
@@ -132,7 +132,7 @@ export default function PatientForm({ onSuccess, initialData = null }) {
 
             <div>
                 <label className={labelClasses}>Date of Birth*</label>
-                <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className={inputClasses} style={{ colorScheme: 'light dark' }} />
+                <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className={inputClasses} />
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
