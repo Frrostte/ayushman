@@ -19,6 +19,7 @@ app.use('/api/patients', require('./routes/patients'));
 app.use('/api/appointments', require('./routes/appointments'));
 app.use('/api/sessions', require('./routes/sessions'));
 app.use('/api/doctors', require('./routes/doctors'));
+app.use('/api/clinics', require('./routes/clinics'));
 
 // Connect Database before starting server
 const startServer = async () => {

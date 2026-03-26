@@ -80,6 +80,13 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
             )
+        },
+        {
+            name: 'Clinics', href: '/superadmin/clinics', icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+            )
         }
     ];
 
@@ -115,13 +122,21 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
                         if (user?.role === 'patient') {
                             return item.name === 'Dashboard';
                         }
+                        if (user?.role === 'superadmin') {
+                            if (['Patients', 'Appointments', 'Doctors'].includes(item.name)) {
+                                return false;
+                            }
+                        }
                         if (item.name === 'Availability' && user?.role !== 'doctor') {
                             return false;
                         }
-                        if (item.name === 'Doctors' && user?.role !== 'admin') {
+                        if (item.name === 'Doctors' && user?.role !== 'admin' && user?.role !== 'superadmin') {
                             return false;
                         }
-                        if (item.name === 'Users' && user?.role !== 'admin') {
+                        if (item.name === 'Users' && user?.role !== 'admin' && user?.role !== 'superadmin') {
+                            return false;
+                        }
+                        if (item.name === 'Clinics' && user?.role !== 'superadmin') {
                             return false;
                         }
                         return true;

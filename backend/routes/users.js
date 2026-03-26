@@ -6,10 +6,11 @@ const roleCheck = require('../middleware/roleCheck');
 
 // @route   GET api/users
 // @desc    Get all users
-// @access  Private (Admin only)
-router.get('/', [auth, roleCheck(['admin'])], async (req, res) => {
+// @access  Private (Admin, Superadmin only)
+router.get('/', [auth, roleCheck(['admin', 'superadmin'])], async (req, res) => {
     try {
-        const users = await User.find().select('-password').sort({ createdAt: -1 });
+        const query = req.user.role === 'superadmin' ? {} : { clinicId: req.user.clinicId };
+        const users = await User.find(query).populate('clinicId', 'name').select('-password').sort({ createdAt: -1 });
         res.json(users);
     } catch (err) {
         console.error(err.message);
@@ -18,13 +19,18 @@ router.get('/', [auth, roleCheck(['admin'])], async (req, res) => {
 }); const bcrypt = require('bcryptjs');
 
 // @route   PUT api/users/:id
-// @desc    Update user info (Admin only)
+// @desc    Update user info (Admin, Superadmin only)
 // @access  Private
-router.put('/:id', [auth, roleCheck(['admin'])], async (req, res) => {
+router.put('/:id', [auth, roleCheck(['admin', 'superadmin'])], async (req, res) => {
     const { name, email, phone, role, password } = req.body;
 
     try {
-        let user = await User.findById(req.params.id);
+        let user = null;
+        if (req.user.role === 'superadmin') {
+            user = await User.findById(req.params.id);
+        } else {
+            user = await User.findOne({ _id: req.params.id, clinicId: req.user.clinicId });
+        }
         if (!user) {
             return res.status(404).json({ msg: 'User not found' });
         }
@@ -43,6 +49,7 @@ router.put('/:id', [auth, roleCheck(['admin'])], async (req, res) => {
         if (email) userFields.email = email;
         if (phone) userFields.phone = phone;
         if (role) userFields.role = role;
+        if (req.body.isActive !== undefined) userFields.isActive = req.body.isActive;
 
         // Optionally update password if provided by admin
         if (password) {
@@ -50,13 +57,56 @@ router.put('/:id', [auth, roleCheck(['admin'])], async (req, res) => {
             userFields.password = await bcrypt.hash(password, salt);
         }
 
-        user = await User.findByIdAndUpdate(
-            req.params.id,
+        const query = req.user.role === 'superadmin' 
+            ? { _id: req.params.id } 
+            : { _id: req.params.id, clinicId: req.user.clinicId };
+
+        user = await User.findOneAndUpdate(
+            query,
             { $set: userFields },
             { new: true }
         ).select('-password');
 
         res.json(user);
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   DELETE api/users/:id
+// @desc    Delete user completely
+// @access  Private (Admin, Superadmin only)
+router.delete('/:id', [auth, roleCheck(['admin', 'superadmin'])], async (req, res) => {
+    try {
+        let user = null;
+        if (req.user.role === 'superadmin') {
+            user = await User.findById(req.params.id);
+        } else {
+            user = await User.findOne({ _id: req.params.id, clinicId: req.user.clinicId });
+        }
+
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        // Prevent deleting yourself
+        if (user.id === req.user.id) {
+            return res.status(400).json({ msg: 'Cannot delete your own account' });
+        }
+
+        if (user.role === 'patient') {
+            await require('../models/Patient').findOneAndDelete({ userId: user.id });
+        } else if (user.role === 'doctor') {
+            await require('../models/Doctor').findOneAndDelete({ userId: user.id });
+        }
+
+        await User.findByIdAndDelete(user.id);
+
+        res.json({ msg: 'User removed' });
     } catch (err) {
         console.error(err.message);
         if (err.kind === 'ObjectId') {

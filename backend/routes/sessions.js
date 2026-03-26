@@ -16,7 +16,7 @@ router.get('/patient/:patientId', auth, async (req, res) => {
             }
         }
 
-        const sessions = await Session.find({ patientId: req.params.patientId })
+        const sessions = await Session.find({ patientId: req.params.patientId, clinicId: req.user.clinicId })
             .populate('doctorId', 'name')
             .sort({ sessionDate: -1 });
         res.json(sessions);
@@ -31,7 +31,7 @@ router.get('/patient/:patientId', auth, async (req, res) => {
 // @access  Private
 router.get('/:id', auth, async (req, res) => {
     try {
-        const session = await Session.findById(req.params.id)
+        const session = await Session.findOne({ _id: req.params.id, clinicId: req.user.clinicId })
             .populate('patientId')
             .populate('doctorId', 'name')
             .populate('appointmentId');
@@ -78,6 +78,7 @@ router.post('/', auth, async (req, res) => {
 
         const newSession = new Session({
             appointmentId,
+            clinicId: req.user.clinicId,
             patientId: appointment.patientId,
             doctorId: req.user.id,
             complaints,
@@ -107,12 +108,12 @@ router.put('/:id', auth, async (req, res) => {
     if (medications) sessionFields.medications = medications;
 
     try {
-        let session = await Session.findById(req.params.id);
+        let session = await Session.findOne({ _id: req.params.id, clinicId: req.user.clinicId });
 
         if (!session) return res.status(404).json({ msg: 'Session not found' });
 
-        session = await Session.findByIdAndUpdate(
-            req.params.id,
+        session = await Session.findOneAndUpdate(
+            { _id: req.params.id, clinicId: req.user.clinicId },
             { $set: sessionFields },
             { new: true }
         );

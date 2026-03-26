@@ -10,7 +10,7 @@ const roleCheck = require('../middleware/roleCheck');
 // @access  Private (Admin, Patient)
 router.get('/', [auth, roleCheck(['admin', 'patient'])], async (req, res) => {
     try {
-        const doctors = await User.find({ role: 'doctor' }).select('-password');
+        const doctors = await User.find({ role: 'doctor', clinicId: req.user.clinicId }).select('-password');
         // Optional: Aggregate with Doctor model if needed, but for simple list, user info is enough.
         res.json(doctors);
     } catch (err) {
@@ -28,7 +28,7 @@ router.get('/me', [auth, roleCheck(['doctor'])], async (req, res) => {
             return res.status(404).json({ msg: 'Doctor profile not found' });
         }
 
-        const doctorProfile = await Doctor.findOne({ userId: req.user.id });
+        const doctorProfile = await Doctor.findOne({ userId: req.user.id, clinicId: req.user.clinicId });
 
         const doctorData = {
             ...user.toObject(),
@@ -52,7 +52,7 @@ router.get('/:id', [auth, roleCheck(['admin', 'doctor', 'patient'])], async (req
             return res.status(404).json({ msg: 'Doctor not found' });
         }
 
-        const doctorProfile = await Doctor.findOne({ userId: req.params.id });
+        const doctorProfile = await Doctor.findOne({ userId: req.params.id, clinicId: req.user.clinicId });
 
         // Merge user and doctor profile
         const doctorData = {
@@ -106,14 +106,14 @@ router.put('/:id', [auth, roleCheck(['admin', 'doctor'])], async (req, res) => {
         if (experience) doctorFields.experience = experience;
         if (qualifications) doctorFields.qualifications = qualifications;
 
-        let doctor = await Doctor.findOne({ userId: req.params.id });
+        let doctor = await Doctor.findOne({ userId: req.params.id, clinicId: req.user.clinicId });
         if (!doctor) {
             // Create if not exists (though unlikely for existing doctor)
-            doctor = new Doctor({ userId: req.params.id, availability: [], ...doctorFields });
+            doctor = new Doctor({ userId: req.params.id, clinicId: req.user.clinicId, availability: [], ...doctorFields });
             await doctor.save();
         } else {
             doctor = await Doctor.findOneAndUpdate(
-                { userId: req.params.id },
+                { userId: req.params.id, clinicId: req.user.clinicId },
                 { $set: doctorFields },
                 { new: true }
             );
@@ -145,10 +145,10 @@ router.put('/availability', [auth, roleCheck(['doctor', 'admin'])], async (req, 
     }
 
     try {
-        let doctor = await Doctor.findOne({ userId: req.user.id });
+        let doctor = await Doctor.findOne({ userId: req.user.id, clinicId: req.user.clinicId });
         if (!doctor) {
             // Create doctor profile if it doesn't exist
-            doctor = new Doctor({ userId: req.user.id, availability: [] });
+            doctor = new Doctor({ userId: req.user.id, clinicId: req.user.clinicId, availability: [] });
         }
 
         const dateStr = dateObj.toISOString().split('T')[0];
@@ -207,9 +207,9 @@ router.post('/availability/bulk', [auth, roleCheck(['doctor', 'admin'])], async 
     }
 
     try {
-        let doctor = await Doctor.findOne({ userId: req.user.id });
+        let doctor = await Doctor.findOne({ userId: req.user.id, clinicId: req.user.clinicId });
         if (!doctor) {
-            doctor = new Doctor({ userId: req.user.id, availability: [] });
+            doctor = new Doctor({ userId: req.user.id, clinicId: req.user.clinicId, availability: [] });
         }
 
         // Ensure availability is an array
@@ -281,7 +281,7 @@ router.delete('/availability', [auth, roleCheck(['doctor', 'admin'])], async (re
     }
 
     try {
-        const doctor = await Doctor.findOne({ userId: req.user.id });
+        const doctor = await Doctor.findOne({ userId: req.user.id, clinicId: req.user.clinicId });
         const targetDate = new Date(date).toISOString().split('T')[0];
 
         if (!doctor || !Array.isArray(doctor.availability)) {
