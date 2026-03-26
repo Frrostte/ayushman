@@ -7,6 +7,11 @@ import Sidebar from './Sidebar';
 export default function LayoutWrapper({ children }) {
     const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(false); // Desktop toggle state
+
+    // Check if we are on client to hydrate cleanly if we wanted to persist to localStorage later
+    // For now, default to open (false)
+
     const isAuthPage = ['/login', '/register', '/'].includes(pathname);
 
     if (isAuthPage) {
@@ -30,9 +35,9 @@ export default function LayoutWrapper({ children }) {
                 </button>
             </header>
 
-            <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+            <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
-            <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 md:ml-64 pt-16 md:pt-0">
+            <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 pt-16 md:pt-0 ${isCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
                 <main className="flex-1 p-4 md:p-8 overflow-y-auto">
                     {children}
                 </main>

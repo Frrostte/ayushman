@@ -16,21 +16,33 @@ export default function NewUser() {
         email: '',
         phone: '',
         password: '',
-        role: 'doctor' // Default
+        role: 'doctor', // Default
+        clinicId: ''
     });
+    const [clinics, setClinics] = useState([]);
+    const [currentUser, setCurrentUser] = useState(null);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
     useEffect(() => {
-        const checkAdmin = () => {
+        const checkAdmin = async () => {
             const userStr = localStorage.getItem('user');
             if (userStr) {
                 const user = JSON.parse(userStr);
-                if (user.role !== 'admin') {
+                if (user.role !== 'admin' && user.role !== 'superadmin') {
                     router.push('/dashboard');
                 } else {
+                    setCurrentUser(user);
+                    if (user.role === 'superadmin') {
+                        try {
+                            const res = await api.get('/clinics');
+                            setClinics(res.data);
+                        } catch (err) {
+                            console.error('Failed to fetch clinics', err);
+                        }
+                    }
                     setIsCheckingAuth(false);
                 }
             } else {
@@ -62,6 +74,12 @@ export default function NewUser() {
             return;
         }
 
+        if (currentUser?.role === 'superadmin' && formData.role !== 'superadmin' && !formData.clinicId) {
+            setError('Please select a clinic for this user');
+            setIsLoading(false);
+            return;
+        }
+
         if (formData.password.length < 6) {
             setError('Password must be at least 6 characters long');
             setIsLoading(false);
@@ -69,7 +87,12 @@ export default function NewUser() {
         }
 
         try {
-            await api.post('/auth/admin/register', formData);
+            const payload = { ...formData };
+            if (currentUser?.role === 'superadmin' && !payload.clinicId) {
+                delete payload.clinicId;
+            }
+
+            await api.post('/auth/admin/register', payload);
             setSuccess(`Successfully created new ${formData.role} account for ${formData.name}`);
             // Reset form
             setFormData({
@@ -77,7 +100,8 @@ export default function NewUser() {
                 email: '',
                 phone: '',
                 password: '',
-                role: 'doctor'
+                role: 'doctor',
+                clinicId: ''
             });
         } catch (err) {
             setError(err.response?.data?.msg || 'Failed to create user');
@@ -118,7 +142,7 @@ export default function NewUser() {
                             {success}
                         </div>
                         <Link href="/admin/users">
-                            <Button variant="outline" className="text-xs py-2 px-4 border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 whitespace-nowrap">
+                            <Button className="text-xs py-2 px-4 whitespace-nowrap w-auto">
                                 View All Users
                             </Button>
                         </Link>
@@ -143,9 +167,22 @@ export default function NewUser() {
                             options={[
                                 { value: 'doctor', label: 'Doctor' },
                                 { value: 'admin', label: 'Administrator' },
-                                { value: 'patient', label: 'Patient' }
+                                { value: 'patient', label: 'Patient' },
+                                ...(currentUser?.role === 'superadmin' ? [{ value: 'superadmin', label: 'Super Admin' }] : [])
                             ]}
                         />
+                        {currentUser?.role === 'superadmin' && formData.role !== 'superadmin' && (
+                            <Select
+                                label="Assign to Clinic*"
+                                name="clinicId"
+                                value={formData.clinicId}
+                                onChange={handleChange}
+                                options={[
+                                    { value: '', label: 'Select a clinic' },
+                                    ...clinics.map(c => ({ value: c._id, label: c.name }))
+                                ]}
+                            />
+                        )}
                         <Input
                             label="Email Address*"
                             type="email"

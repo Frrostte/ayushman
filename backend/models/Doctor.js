@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const doctorSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+    clinicId: { type: mongoose.Schema.Types.ObjectId, ref: 'Clinic', required: true },
     specialization: { type: String, default: 'General Physician' },
     qualifications: { type: String },
     experience: { type: Number, default: 0 },

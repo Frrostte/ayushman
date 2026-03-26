@@ -55,6 +55,7 @@ router.get('/slots', auth, async (req, res) => {
 
         const appointments = await Appointment.find({
             doctorId,
+            clinicId: req.user.clinicId,
             date: { $gte: startOfDay, $lte: endOfDay },
             status: { $ne: 'cancelled' }
         });
@@ -72,10 +73,17 @@ router.get('/slots', auth, async (req, res) => {
 
 // @route   GET api/appointments
 // @desc    Get all appointments
-// @access  Private (Doctor only)
+// @access  Private (Doctor/Admin)
 router.get('/', [auth, roleCheck(['doctor', 'admin'])], async (req, res) => {
     try {
-        const appointments = await Appointment.find()
+        let query = { clinicId: req.user.clinicId };
+        
+        // If user is a doctor, filter strictly to their own appointments
+        if (req.user.role === 'doctor') {
+            query.doctorId = req.user.id;
+        }
+
+        const appointments = await Appointment.find(query)
             .populate({
                 path: 'patientId',
                 populate: { path: 'userId', select: 'name' }
@@ -94,7 +102,14 @@ router.get('/', [auth, roleCheck(['doctor', 'admin'])], async (req, res) => {
 // @access  Private
 router.get('/:id', auth, async (req, res) => {
     try {
-        const appointment = await Appointment.findById(req.params.id)
+        let query = { _id: req.params.id, clinicId: req.user.clinicId };
+        
+        // If user is a doctor, enforce they can only view their own
+        if (req.user.role === 'doctor') {
+            query.doctorId = req.user.id;
+        }
+
+        const appointment = await Appointment.findOne(query)
             .populate({
                 path: 'patientId',
                 populate: { path: 'userId', select: 'name' }
@@ -115,7 +130,7 @@ router.get('/:id', auth, async (req, res) => {
 // @access  Private
 router.get('/doctor/:doctorId', auth, async (req, res) => {
     try {
-        const appointments = await Appointment.find({ doctorId: req.params.doctorId })
+        const appointments = await Appointment.find({ doctorId: req.params.doctorId, clinicId: req.user.clinicId })
             .populate('patientId')
             .populate({
                 path: 'patientId',
@@ -134,7 +149,7 @@ router.get('/doctor/:doctorId', auth, async (req, res) => {
 // @access  Private
 router.get('/patient/:patientId', auth, async (req, res) => {
     try {
-        const appointments = await Appointment.find({ patientId: req.params.patientId })
+        const appointments = await Appointment.find({ patientId: req.params.patientId, clinicId: req.user.clinicId })
             .populate('doctorId', 'name')
             .sort({ date: 1 });
         res.json(appointments);
@@ -153,6 +168,7 @@ router.post('/', auth, async (req, res) => {
     try {
         const newAppointment = new Appointment({
             patientId,
+            clinicId: req.user.clinicId,
             doctorId,
             date,
             time
@@ -161,6 +177,7 @@ router.post('/', auth, async (req, res) => {
         // Check for existing appointment
         const existingAppointment = await Appointment.findOne({
             doctorId,
+            clinicId: req.user.clinicId,
             date,
             time,
             status: { $ne: 'cancelled' }
@@ -185,12 +202,12 @@ router.put('/:id', auth, async (req, res) => {
     const { status } = req.body;
 
     try {
-        let appointment = await Appointment.findById(req.params.id);
+        let appointment = await Appointment.findOne({ _id: req.params.id, clinicId: req.user.clinicId });
 
         if (!appointment) return res.status(404).json({ msg: 'Appointment not found' });
 
-        appointment = await Appointment.findByIdAndUpdate(
-            req.params.id,
+        appointment = await Appointment.findOneAndUpdate(
+            { _id: req.params.id, clinicId: req.user.clinicId },
             { $set: { status } },
             { new: true }
         );
@@ -207,7 +224,7 @@ router.put('/:id', auth, async (req, res) => {
 // @access  Private
 router.delete('/:id', auth, async (req, res) => {
     try {
-        const appointment = await Appointment.findById(req.params.id);
+        const appointment = await Appointment.findOne({ _id: req.params.id, clinicId: req.user.clinicId });
 
         if (!appointment) {
             return res.status(404).json({ msg: 'Appointment not found' });
@@ -216,7 +233,7 @@ router.delete('/:id', auth, async (req, res) => {
         // Check user authorization (optional: passed auth middleware but could check ownership)
         // For simplicity allow deleting if authenticated
 
-        await Appointment.findByIdAndDelete(req.params.id);
+        await Appointment.findOneAndDelete({ _id: req.params.id, clinicId: req.user.clinicId });
 
         res.json({ msg: 'Appointment removed' });
     } catch (err) {

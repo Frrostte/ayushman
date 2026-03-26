@@ -11,7 +11,7 @@ const roleCheck = require('../middleware/roleCheck');
 // @access  Private (Doctor only)
 router.get('/', [auth, roleCheck(['doctor', 'admin'])], async (req, res) => {
     try {
-        const patients = await Patient.find()
+        const patients = await Patient.find({ clinicId: req.user.clinicId })
             .populate('userId', 'name email phone role')
             .sort({ createdAt: -1 });
 
@@ -65,7 +65,7 @@ router.get('/me', auth, async (req, res) => {
 // @access  Private
 router.get('/:id', auth, async (req, res) => {
     try {
-        const patient = await Patient.findById(req.params.id).populate('userId', 'name email phone');
+        const patient = await Patient.findOne({ _id: req.params.id, clinicId: req.user.clinicId }).populate('userId', 'name email phone');
         if (!patient) return res.status(404).json({ msg: 'Patient not found' });
         res.json(patient);
     } catch (err) {
@@ -84,6 +84,7 @@ router.post('/', auth, async (req, res) => {
     try {
         const newPatient = new Patient({
             userId,
+            clinicId: req.user.clinicId,
             dateOfBirth,
             gender,
             address,
@@ -112,7 +113,7 @@ router.put('/:id', auth, async (req, res) => {
     if (medicalNotes) patientFields.medicalNotes = medicalNotes;
 
     try {
-        let patient = await Patient.findById(req.params.id);
+        let patient = await Patient.findOne({ _id: req.params.id, clinicId: req.user.clinicId });
 
         if (!patient) return res.status(404).json({ msg: 'Patient not found' });
 
@@ -129,8 +130,8 @@ router.put('/:id', auth, async (req, res) => {
             );
         }
 
-        patient = await Patient.findByIdAndUpdate(
-            req.params.id,
+        patient = await Patient.findOneAndUpdate(
+            { _id: req.params.id, clinicId: req.user.clinicId },
             { $set: patientFields },
             { new: true }
         ).populate('userId', 'name email phone');

@@ -10,7 +10,12 @@ const auth = require('../middleware/auth');
 // @desc    Register user
 // @access  Public
 router.post('/register', async (req, res) => {
-    const { email, password, name, phone, role } = req.body;
+    let { email, password, name, phone, role, clinicId } = req.body;
+
+    // For public registration (e.g. patients), they must select a clinicId on frontend
+    if (!clinicId && role !== 'superadmin') {
+        return res.status(400).json({ msg: 'Clinic ID is required' });
+    }
 
     try {
         let user = await User.findOne({ email });
@@ -24,7 +29,8 @@ router.post('/register', async (req, res) => {
             password,
             name,
             phone,
-            role
+            role,
+            clinicId
         });
 
         const salt = await bcrypt.genSalt(10);
@@ -35,7 +41,8 @@ router.post('/register', async (req, res) => {
         const payload = {
             user: {
                 id: user.id,
-                role: user.role
+                role: user.role,
+                clinicId: user.clinicId
             }
         };
 
@@ -45,7 +52,7 @@ router.post('/register', async (req, res) => {
             { expiresIn: process.env.JWT_EXPIRE },
             (err, token) => {
                 if (err) throw err;
-                res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+                res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, clinicId: user.clinicId } });
             }
         );
     } catch (err) {
@@ -58,8 +65,17 @@ router.post('/register', async (req, res) => {
 // @desc    Admin register new user (no auto login)
 // @access  Private (Admin)
 const roleCheck = require('../middleware/roleCheck');
-router.post('/admin/register', [auth, roleCheck(['admin'])], async (req, res) => {
-    const { email, password, name, phone, role } = req.body;
+router.post('/admin/register', [auth, roleCheck(['admin', 'superadmin'])], async (req, res) => {
+    let { email, password, name, phone, role, clinicId } = req.body;
+
+    // If an admin is creating the user, automatically assign to their clinic
+    if (!clinicId && req.user.clinicId) {
+        clinicId = req.user.clinicId;
+    }
+
+    if (!clinicId && role !== 'superadmin') {
+        return res.status(400).json({ msg: 'Clinic ID is required' });
+    }
 
     try {
         let user = await User.findOne({ email });
@@ -73,7 +89,8 @@ router.post('/admin/register', [auth, roleCheck(['admin'])], async (req, res) =>
             password,
             name,
             phone,
-            role
+            role,
+            clinicId
         });
 
         const salt = await bcrypt.genSalt(10);
@@ -81,7 +98,27 @@ router.post('/admin/register', [auth, roleCheck(['admin'])], async (req, res) =>
 
         await user.save();
 
-        res.json({ msg: 'User created successfully', user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+        // Auto-create associated role profile
+        if (role === 'patient') {
+            const Patient = require('../models/Patient');
+            const newPatient = new Patient({
+                userId: user.id,
+                clinicId: user.clinicId
+            });
+            await newPatient.save();
+        } else if (role === 'doctor') {
+            const Doctor = require('../models/Doctor');
+            const existingDoc = await Doctor.findOne({ userId: user.id });
+            if (!existingDoc) {
+                const newDoctor = new Doctor({
+                    userId: user.id,
+                    clinicId: user.clinicId
+                });
+                await newDoctor.save();
+            }
+        }
+
+        res.json({ msg: 'User created successfully', user: { id: user.id, name: user.name, email: user.email, role: user.role, clinicId: user.clinicId } });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
@@ -108,10 +145,25 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ msg: 'Invalid Credentials' });
         }
 
+        // --- Check if user itself is inactive ---
+        if (user.isActive === false) {
+            return res.status(403).json({ msg: 'Account Suspended: Your profile is completely inactive.' });
+        }
+
+        // --- Check if user belongs to an inactive clinic ---
+        if (user.clinicId && user.role !== 'superadmin') {
+            const Clinic = require('../models/Clinic');
+            const clinic = await Clinic.findById(user.clinicId);
+            if (clinic && clinic.isActive === false) {
+                return res.status(403).json({ msg: 'Account Suspended: Your clinic is currently inactive. Please contact support.' });
+            }
+        }
+
         const payload = {
             user: {
                 id: user.id,
-                role: user.role
+                role: user.role,
+                clinicId: user.clinicId
             }
         };
 
@@ -121,7 +173,7 @@ router.post('/login', async (req, res) => {
             { expiresIn: process.env.JWT_EXPIRE },
             (err, token) => {
                 if (err) throw err;
-                res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+                res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, clinicId: user.clinicId } });
             }
         );
     } catch (err) {

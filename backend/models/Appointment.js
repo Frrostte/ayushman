@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const appointmentSchema = new mongoose.Schema({
     patientId: { type: mongoose.Schema.Types.ObjectId, ref: 'Patient', required: true },
+    clinicId: { type: mongoose.Schema.Types.ObjectId, ref: 'Clinic', required: true },
     doctorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     date: { type: Date, required: true },
     time: { type: String, required: true },
@@ -13,8 +14,8 @@ const appointmentSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-// Prevent double booking: unique doctor, date, and time, unless cancelled
-appointmentSchema.index({ doctorId: 1, date: 1, time: 1 }, {
+// Prevent double booking: unique doctor, date, and time, within the same clinic, unless cancelled
+appointmentSchema.index({ clinicId: 1, doctorId: 1, date: 1, time: 1 }, {
     unique: true,
     partialFilterExpression: { status: { $ne: 'cancelled' } }
 });
