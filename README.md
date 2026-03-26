@@ -4,25 +4,30 @@ A full-stack web application for managing clinic operations, including patient r
 
 ## Features
 
-- **User Authentication**: Secure login and registration for doctors, patients, and admins
-- **Patient Management**: Create and manage patient profiles with medical information
+- **Multi-Clinic Architecture**: Support for multiple independent clinics with data isolation and clinic-specific management
+- **User Authentication**: Secure login and registration for doctors, patients, admins, and superadmins with clinic selection
+- **Patient Management**: Create and manage patient profiles with medical information within clinics
 - **Doctor Management**: Comprehensive doctor profiles with specialization, qualifications, and experience tracking
-- **Appointment Scheduling**: Book, view, and manage appointments between patients and doctors
+- **Appointment Scheduling**: Book, view, and manage appointments between patients and doctors with clinic isolation
 - **Medical Sessions**: Track doctor-patient consultation sessions with prescriptions
-- **Doctor Availability Management**: Set and manage doctor availability with single-day or bulk updates
-- **Role-Based Access Control**: Multi-tier permissions for admins, doctors, and patients
+- **Doctor Availability Management**: Set and manage doctor availability with single-day or bulk updates with configurable slot durations
+- **Multi-Tier Role-Based Access Control**: Permissions for superadmins, clinic admins, doctors, and patients
+- **Clinic Administration**: Superadmins can create and manage multiple clinics and their admin users
+- **User Management**: Clinic admins can manage staff users and assign them to clinics
 - **Dark/Light Theme**: Toggle between dark and light modes with persistent preference
 - **Responsive UI**: Modern, mobile-first interface with sidebar navigation built with React and Tailwind CSS
 - **Interactive Calendar**: Visual calendar component for date selection and availability viewing
+- **Account Status Management**: Track active/inactive status for users and clinics
 
 ## Tech Stack
 
 ### Backend
 - **Framework**: Express.js
-- **Database**: MongoDB (via Mongoose ODM)
-- **Authentication**: JWT (JSON Web Token)
-- **Security**: bcryptjs for password hashing, CORS enabled
+- **Database**: MongoDB (via Mongoose ODM) with multi-clinic support
+- **Authentication**: JWT (JSON Web Token) with clinic-scoped tokens
+- **Security**: bcryptjs for password hashing, CORS enabled, clinic data isolation
 - **Environment**: Node.js
+- **Seed Data**: Automatic initialization of default superadmin and clinic
 
 ### Frontend
 - **Framework**: Next.js 14 (App Router)
@@ -81,6 +86,14 @@ clinic-management/
 │   │   │   │   └── page.jsx
 │   │   │   ├── availability/     # Doctor availability management
 │   │   │   │   └── page.jsx
+│   │   │   ├── admin/            # Admin pages (clinic-scoped)
+│   │   │   │   └── users/        # User management for clinic admins
+│   │   │   │       ├── page.jsx  # User list
+│   │   │   │       └── new/      # Add new user
+│   │   │   │           └── page.jsx
+│   │   │   ├── superadmin/       # Superadmin pages (system-wide)
+│   │   │   │   └── clinics/      # Clinic management
+│   │   │   │       └── page.jsx
 │   │   │   ├── doctors/          # Doctor management (admin)
 │   │   │   │   ├── page.jsx      # Doctor list
 │   │   │   │   ├── new/          # Add new doctor
@@ -208,42 +221,53 @@ NEXT_PUBLIC_API_URL=http://localhost:5000/api    # Backend API endpoint (must be
 ## API Endpoints
 
 ### Authentication
-- `POST /api/auth/register` - Register a new user (doctor/patient), returns JWT token and user info
-- `POST /api/auth/login` - Login user and get JWT token, validates credentials
-- `GET /api/auth/user` - Get logged in user profile (requires authentication)
+- `POST /api/auth/register` - Register a new user (doctor/patient) with clinicId selection, returns JWT token and user info (requires clinicId unless role is superadmin)
+- `POST /api/auth/admin/register` - Admin-only user registration (no auto login), automatically assigns user to admin's clinic (admin/superadmin only)
+- `POST /api/auth/login` - Login user and get JWT token, validates credentials and checks user/clinic active status (includes clinicId in response)
+- `GET /api/auth/user` - Get logged in user profile with doctor info (if user is doctor) (requires authentication)
 
 ### Doctors
-- `GET /api/doctors` - Get all doctors (authentication required, admin/patient only)
+- `GET /api/doctors` - Get all doctors in clinic (authentication required, doctor/admin only)
 - `GET /api/doctors/me` - Get current doctor profile with specialization and availability (doctor only)
 - `GET /api/doctors/:id` - Get single doctor by ID with full profile (authentication required)
 - `PUT /api/doctors/:id` - Update doctor profile (name, email, phone, specialization, experience, qualifications) (admin or same doctor)
-- `PUT /api/doctors/availability` - Update doctor availability for a single date (requires date, startTime, endTime, optional slotDuration)
-- `POST /api/doctors/availability/bulk` - Bulk update availability for date range (requires startDate, endDate, startTime, endTime, optional daysOfWeek array, slotDuration)
+- `PUT /api/doctors/availability` - Update doctor availability for a single date (requires date, startTime, endTime, optional slotDuration in minutes)
+- `POST /api/doctors/availability/bulk` - Bulk update availability for date range (requires startDate, endDate, startTime, endTime, optional daysOfWeek array, optional slotDuration)
 - `DELETE /api/doctors/availability?date=YYYY-MM-DD` - Remove availability for a specific date (doctor only)
 
+### Clinics
+- `GET /api/clinics` - Get all clinics (superadmin only)
+- `GET /api/clinics/active` - Get all active clinics for public registration (public access)
+- `POST /api/clinics` - Create a new clinic (superadmin only)
+- `PUT /api/clinics/:id` - Update clinic details (superadmin only)
+
+### Users
+- `GET /api/users` - Get all users in clinic (admin/superadmin only)
+- `PUT /api/users/:id` - Update user information (admin/superadmin only)
+
 ### Patients
-- `GET /api/patients` - Get all patients with user details (doctor only)
-- `GET /api/patients/me` - Get current user's patient profile
-- `GET /api/patients/:id` - Get patient by ID with user details
-- `POST /api/patients` - Create new patient profile (requires userId, dateOfBirth, gender, address, medicalNotes)
-- `PUT /api/patients/:id` - Update patient profile (dateOfBirth, gender, address, medicalNotes)
-- `DELETE /api/patients/:id` - Delete patient profile
+- `GET /api/patients` - Get all patients in clinic with user details (doctor/admin only, clinic-scoped)
+- `GET /api/patients/me` - Get current user's patient profile (patient only)
+- `GET /api/patients/:id` - Get patient by ID with user details (clinic-scoped access)
+- `POST /api/patients` - Create new patient profile with clinic auto-assignment (requires userId, dateOfBirth, gender, address, medicalNotes)
+- `PUT /api/patients/:id` - Update patient profile (clinic-scoped access)
+- `DELETE /api/patients/:id` - Delete patient profile (admin only, clinic-scoped)
 
 ### Appointments
-- `GET /api/appointments` - Get all appointments with patient and doctor details, sorted by date (doctor only)
-- `GET /api/appointments/slots?doctorId=X&date=YYYY-MM-DD` - Get available 30-minute time slots for a doctor on specific date
-- `GET /api/appointments/:id` - Get single appointment with populated patient and doctor info
-- `GET /api/appointments/patient/:patientId` - Get all appointments for a specific patient
-- `POST /api/appointments` - Create new appointment (30-minute slots, prevents double-booking)
-- `PUT /api/appointments/:id` - Update appointment details or status
-- `DELETE /api/appointments/:id` - Cancel appointment
+- `GET /api/appointments` - Get all appointments in clinic with patient and doctor details, sorted by date (doctor/admin only, clinic-scoped)
+- `GET /api/appointments/slots?doctorId=X&date=YYYY-MM-DD` - Get available appointment time slots for a doctor on specific date with variable slot duration (clinic-scoped)
+- `GET /api/appointments/:id` - Get single appointment with populated patient and doctor info (clinic-scoped access)
+- `GET /api/appointments/patient/:patientId` - Get all appointments for a specific patient (patient/doctor access, clinic-scoped)
+- `POST /api/appointments` - Create new appointment with clinic auto-assignment, supports variable slot durations, prevents double-booking within clinic
+- `PUT /api/appointments/:id` - Update appointment details or status (clinic-scoped access)
+- `DELETE /api/appointments/:id` - Cancel appointment (clinic-scoped access)
 
 ### Sessions (Medical Consultations)
-- `GET /api/sessions` - Get all sessions
-- `GET /api/sessions/:id` - Get single session with populated appointment, patient, and doctor info
-- `GET /api/sessions/patient/:patientId` - Get all sessions for a patient, sorted by date descending (patient access control)
-- `POST /api/sessions` - Create session with prescription (appointmentId, complaints, diagnosis, notes, medications)
-- `PUT /api/sessions/:id` - Update session details (doctor can update complaints, diagnosis, notes, medications)
+- `GET /api/sessions` - Get all sessions in clinic (doctor/admin only, clinic-scoped)
+- `GET /api/sessions/:id` - Get single session with populated appointment, patient, and doctor info (clinic-scoped access)
+- `GET /api/sessions/patient/:patientId` - Get all sessions for a patient, sorted by date descending (patient only, clinic-scoped)
+- `POST /api/sessions` - Create session with prescription, clinic auto-assignment (appointmentId, complaints, diagnosis, notes, medications)
+- `PUT /api/sessions/:id` - Update session details (doctor/admin can update complaints, diagnosis, notes, medications) (clinic-scoped)
 
 ## Data Models
 
@@ -252,11 +276,21 @@ NEXT_PUBLIC_API_URL=http://localhost:5000/api    # Backend API endpoint (must be
 - **password**: String (hashed with bcryptjs, required)
 - **name**: String (required)
 - **phone**: String (required)
-- **role**: String (enum: 'doctor', 'patient', 'admin', required)
+- **role**: String (enum: 'doctor', 'patient', 'admin', 'superadmin', required)
+- **clinicId**: ObjectId (reference to Clinic, optional for superadmin, required for others)
+- **isActive**: Boolean (default: true, used to suspend user accounts)
 - **createdAt**: Date (timestamp of account creation)
+
+### Clinic
+- **name**: String (clinic name, required)
+- **address**: String (clinic address, optional)
+- **contactNumber**: String (clinic contact number, optional)
+- **isActive**: Boolean (default: true, used to suspend entire clinic)
+- **createdAt**: Date (timestamp of clinic creation)
 
 ### Doctor
 - **userId**: ObjectId (reference to User, required, unique)
+- **clinicId**: ObjectId (reference to Clinic, required)
 - **specialization**: String (default: 'General Physician')
 - **qualifications**: String (optional)
 - **experience**: Number (years of experience, default: 0)
@@ -264,11 +298,12 @@ NEXT_PUBLIC_API_URL=http://localhost:5000/api    # Backend API endpoint (must be
   - **date**: Date (specific date for availability)
   - **startTime**: String (HH:MM format)
   - **endTime**: String (HH:MM format)
-  - **slotDuration**: Number (minutes, default: 30)
+  - **slotDuration**: Number (minutes for appointments, default: 30, supports dynamic durations)
 - **createdAt**: Date (timestamp of profile creation)
 
 ### Patient
 - **userId**: ObjectId (reference to User, required)
+- **clinicId**: ObjectId (reference to Clinic, required)
 - **dateOfBirth**: Date (optional)
 - **gender**: String (enum: 'male', 'female', 'other', optional)
 - **address**: String (optional)
@@ -277,15 +312,17 @@ NEXT_PUBLIC_API_URL=http://localhost:5000/api    # Backend API endpoint (must be
 
 ### Appointment
 - **patientId**: ObjectId (reference to Patient, required)
+- **clinicId**: ObjectId (reference to Clinic, required)
 - **doctorId**: ObjectId (reference to User, required)
 - **date**: Date (appointment date, required)
 - **time**: String (appointment time in HH:MM format, required)
 - **status**: String (enum: 'scheduled', 'completed', 'cancelled', default: 'scheduled')
 - **createdAt**: Date (timestamp of appointment creation)
-- **Note**: Unique compound index on (doctorId, date, time) excluding cancelled appointments prevents double-booking
+- **Note**: Unique compound index on (clinicId, doctorId, date, time) excluding cancelled appointments prevents double-booking within clinic
 
 ### Session (Medical Consultation)
 - **appointmentId**: ObjectId (reference to Appointment, required)
+- **clinicId**: ObjectId (reference to Clinic, required)
 - **patientId**: ObjectId (reference to Patient, required)
 - **doctorId**: ObjectId (reference to User, required)
 - **complaints**: String (patient's initial complaints)
@@ -297,24 +334,28 @@ NEXT_PUBLIC_API_URL=http://localhost:5000/api    # Backend API endpoint (must be
 ## Frontend Features
 
 - **Next.js 14 App Router**: Modern file-based routing with app/ directory
-- **Authentication Flow**: Login/register pages with JWT token storage in localStorage
+- **Authentication Flow**: Login/register pages with JWT token storage in localStorage, clinic selection on registration
 - **Theme Switching**: Dark/light mode toggle with next-themes, persistent across sessions
 - **Responsive Design**: Mobile-first Tailwind CSS with responsive sidebar navigation
 - **Layout System**: Consistent layout with LayoutWrapper and Sidebar components
-- **API Integration**: Axios client with automatic JWT token injection via interceptor
+- **API Integration**: Axios client with automatic JWT token injection via interceptor (includes clinicId context)
+- **Multi-Clinic Awareness**: All data queries automatically filtered by current user's clinicId
 - **User-Specific Dashboards**: 
-  - **Admin Dashboard**: Manage doctors and view all system data
+  - **Superadmin Dashboard**: Manage clinics, view all system data across clinics
+  - **Admin Dashboard**: Manage clinic users, doctors, patients, and view all clinic data
   - **Doctor Dashboard**: View appointments, manage patients, create sessions, manage availability, edit profile
   - **Patient Dashboard**: View appointments, view medical sessions
 - **Doctor Management**: Full CRUD operations for doctor profiles (admin only)
 - **Availability Management**: 
-  - Single-day availability setting
-  - Bulk availability updates for date ranges
-  - Visual calendar for date selection
+  - Single-day availability setting with configurable slot durations
+  - Bulk availability updates for date ranges with day-of-week selection
+  - Visual calendar for date selection and availability viewing
   - Delete specific availability slots
+- **Clinic Selection**: Public registration shows only active clinics
+- **User Management**: Admin interface for creating and managing clinic users
 - **Dynamic Forms**: Appointment booking, patient profile management, session creation with prescriptions, availability forms
 - **Interactive Components**: Calendar, Modal, Cards with consistent styling
-- **Data Fetching**: Client-side rendering with data fetched from backend API
+- **Data Fetching**: Client-side rendering with data fetched from backend API (clinic-scoped)
 - **Navigation**: Sidebar component with role-based menu filtering
 - **Date/Time Management**: date-fns library for date formatting, manipulation, and calendar functionality
 
@@ -377,73 +418,90 @@ npm run lint   # Run ESLint to check code quality
 ## Security Features
 
 - **Password Hashing**: bcryptjs (salt rounds: 10) for secure password storage, passwords never sent in responses
-- **JWT Authentication**: Token-based authentication for API endpoints with Bearer token in Authorization header, auto-attached by axios interceptor on frontend
+- **JWT Authentication**: Token-based authentication for API endpoints with Bearer token in Authorization header, auto-attached by axios interceptor on frontend (includes clinicId claim)
 - **Token Expiration**: Configurable JWT expiration (default 7 days via JWT_EXPIRE env variable)
+- **Account Status Control**: Users and clinics can be suspended via isActive flag
+- **Login Validation**: Checks both user.isActive and clinic.isActive before granting access
 - **Role-Based Access Control**: 
-  - **Admin**: Full access to all endpoints, can manage doctors, view all data
-  - **Doctors**: Access to doctor-only endpoints (availability management, profile editing, patient and appointment management)
-  - **Patients**: Limited access, can only view their own profile, appointments, and sessions
-  - Doctors-only endpoints: GET /doctors/me, PUT /doctors/availability, bulk availability
-  - Admin-only endpoints: GET all doctors, POST new doctors, PUT any doctor profile
-  - Patients can only view their own profile, appointments, and sessions
-  - Doctors can only access/modify sessions related to their appointments
+  - **Superadmin**: Full system access, can create/manage clinics and clinic admins
+  - **Admin**: Clinic-scoped access, can manage clinic users, doctors, patients, and view clinic data
+  - **Doctors**: Can manage own profile, availability, view appointments and patients within clinic
+  - **Patients**: Limited access, can only view their own profile, appointments, and sessions within clinic
+  - All data queries include clinicId filter to prevent cross-clinic access
   - `roleCheck` middleware validates user roles on protected endpoints
-- **Double Booking Prevention**: MongoDB unique compound index on (doctorId, date, time) excludes cancelled appointments
+  - Clinic data isolation enforced at database query level
+- **Double Booking Prevention**: MongoDB unique compound index on (clinicId, doctorId, date, time) excludes cancelled appointments within each clinic
+- **Clinic Data Isolation**: All queries filtered by clinicId to prevent accessing data from other clinics
 - **CORS**: Configured to allow frontend-backend communication
 - **Environment Variables**: Sensitive data stored in .env files (PORT, MONGODB_URI, JWT_SECRET, JWT_EXPIRE)
   - Never commit .env files to version control
 - **Access Control Middleware**: 
-  - `auth` middleware: Verifies JWT tokens from Authorization header, attaches user info to request
+  - `auth` middleware: Verifies JWT tokens from Authorization header, attaches user info and clinicId to request
   - `roleCheck` middleware: Validates that user has required role(s) for endpoint
 - **Input Validation**: Server-side validation on all endpoints (date formats, required fields, ObjectId validation)
 - **Error Handling**: Generic error messages to prevent information disclosure
 
 ## Appointment Slot Generation
 
-The system automatically generates appointment slots based on doctor availability stored in the Doctor model:
+The system automatically generates appointment slots based on doctor availability with dynamic slot durations:
 
-1. **Doctor Availability**: Doctor sets availability via PUT `/api/doctors/availability` with date, startTime (e.g., "09:00"), and endTime (e.g., "17:00")
-2. **Bulk Availability**: Doctors can set availability for multiple days using POST `/api/doctors/availability/bulk` with date range and optional days of week filter
-3. **Slot Storage**: Availability is stored in the Doctor model with configurable slotDuration (default 30 minutes)
-4. **Slot Generation**: System generates time slots at specified intervals between start and end time
-   - Example: 09:00, 09:30, 10:00, 10:30, 11:00, etc.
-5. **Filtering**: Available slots exclude times that already have confirmed appointments
-6. **Response**: GET `/api/appointments/slots` returns array of available times in HH:MM format
-7. **Booking**: Patient can book any available slot, system prevents double-booking with MongoDB unique index
+1. **Doctor Availability**: Doctor sets availability via PUT `/api/doctors/availability` with date, startTime (e.g., "09:00"), endTime (e.g., "17:00"), and optional slotDuration in minutes (default 30)
+2. **Bulk Availability**: Doctors can set availability for multiple days using POST `/api/doctors/availability/bulk` with date range, optional days of week filter, and slotDuration
+3. **Slot Storage**: Availability is stored in the Doctor model with configurable slotDuration (default 30 minutes, supports any duration)
+4. **Dynamic Slot Generation**: System generates time slots at specified intervals between start and end time
+   - Example with 30min: 09:00, 09:30, 10:00, 10:30, 11:00, etc.
+   - Example with 60min: 09:00, 10:00, 11:00, etc.
+   - Example with 45min: 09:00, 09:45, 10:30, 11:15, etc.
+5. **Clinic-Aware Filtering**: Available slots exclude times that already have confirmed appointments within the clinic
+6. **Response**: GET `/api/appointments/slots?doctorId=X&date=YYYY-MM-DD` returns array of available times in HH:MM format
+7. **Booking**: Patient can book any available slot, system prevents double-booking with clinic-scoped unique index
 8. **Management**: Doctors can view, update, and delete availability entries via dedicated endpoints
 
 ## Workflow
 
-### Admin Operations
-1. Admin registers with role 'admin' via POST `/api/auth/register`
-2. Admin logs in and receives JWT token via POST `/api/auth/login`
-3. Admin can add new doctors through the `/doctors/new` page, which uses POST `/api/auth/register` with role 'doctor'
-4. Admin can view and manage all doctors via GET `/api/doctors` and PUT `/api/doctors/:id`
-5. Admin has full access to all system functionality
+### Superadmin Operations
+1. Initial superadmin is seeded during server startup with credentials:
+   - Email: admin@ayushman.com
+   - Password: gadminSAY123!@
+2. Superadmin can create new clinics via POST `/api/clinics` with name, address, and contact number
+3. Superadmin can view all clinics via GET `/api/clinics` and manage them via PUT `/api/clinics/:id`
+4. Superadmin can create clinic administrators via POST `/api/auth/admin/register` without clinic assignment
+5. Superadmin has access to system-wide analytics and management functions
 
-### Doctor Registration & Setup
-1. Doctor registers (or is registered by admin) with email, password, name, and phone via POST `/api/auth/register`
-2. Doctor logs in and receives JWT token via POST `/api/auth/login`
-3. Doctor creates/updates profile with specialization, qualifications, and experience via PUT `/api/doctors/:id`
-4. Doctor sets availability using:
-   - Single-day: PUT `/api/doctors/availability` with date and time range
-   - Bulk: POST `/api/doctors/availability/bulk` with date range and optional days filter
-5. Doctor can view and manage availability via GET `/api/doctors/me` and DELETE `/api/doctors/availability?date=YYYY-MM-DD`
-6. Doctor can view all registered patients via GET `/api/patients`
-7. Doctor views upcoming appointments via GET `/api/appointments`
+### Clinic Admin Operations
+1. Clinic admin is created by superadmin or another admin via POST `/api/auth/admin/register` with clinicId assignment
+2. Admin logs in and receives JWT token with clinicId claim via POST `/api/auth/login`
+3. Admin can view all clinic users via GET `/api/users` (filtered to clinic)
+4. Admin can add new users (doctors, staff) via POST `/api/auth/admin/register` which auto-assigns to their clinic
+5. Admin can view and manage all clinic doctors via GET `/api/doctors` and PUT `/api/doctors/:id`
+6. Admin has full access to all clinic-specific functionality (filtered by clinicId)
+7. Admin can suspend user accounts or view clinic information
+
+### Doctor Setup & Management
+1. Doctor is registered by clinic admin via POST `/api/auth/admin/register` with clinic auto-assignment
+2. OR Doctor self-registers via POST `/api/auth/register` and selects their clinic (clinic must be active)
+3. Doctor logs in and receives JWT token with clinicId via POST `/api/auth/login`
+4. Doctor creates/updates profile with specialization, qualifications, and experience via PUT `/api/doctors/:id`
+5. Doctor sets availability using:
+   - Single-day: PUT `/api/doctors/availability` with date, time range, and optional slotDuration
+   - Bulk: POST `/api/doctors/availability/bulk` with date range, optional days filter, and slotDuration
+6. Doctor can view and manage availability via GET `/api/doctors/me` and DELETE `/api/doctors/availability?date=YYYY-MM-DD`
+7. Doctor can view all clinic patients via GET `/api/patients` (clinic-scoped)
+8. Doctor views clinic appointments via GET `/api/appointments` (clinic-scoped)
 
 ### Patient Registration & Booking
 1. Patient registers with email, password, name, and phone via POST `/api/auth/register`
-2. Patient logs in and receives JWT token via POST `/api/auth/login`
-3. Patient creates their profile with personal and medical information via POST `/api/patients`
-4. Patient views available doctors and their appointment slots via GET `/api/appointments/slots?doctorId=X&date=YYYY-MM-DD`
-5. Patient books appointment for available time slot via POST `/api/appointments`
-6. Appointment confirmed and added to schedule (prevents double-booking)
+2. Public registration shows only active clinics via GET `/api/clinics/active`
+3. Patient logs in and receives JWT token with clinicId via POST `/api/auth/login`
+4. Patient creates their profile with personal and medical information via POST `/api/patients` (auto-assigned clinicId)
+5. Patient views available doctors within clinic and their appointment slots via GET `/api/appointments/slots?doctorId=X&date=YYYY-MM-DD`
+6. Patient books appointment for available time slot via POST `/api/appointments` (clinic-scoped)
+7. Appointment confirmed and added to schedule with double-booking prevention within clinic
 
 ### Consultation & Medical Records
 1. Doctor sees appointment in their dashboard via GET `/api/appointments`
 2. During consultation, doctor creates a session via POST `/api/sessions` with appointment ID, complaints, diagnosis, and medications
-3. Session saved to patient's medical history in database
+3. Session saved to patient's medical history in database (clinic-scoped)
 4. Patient can view all past sessions and medical records via GET `/api/sessions/patient/:patientId`
 5. Doctor can update session details via PUT `/api/sessions/:id`
 

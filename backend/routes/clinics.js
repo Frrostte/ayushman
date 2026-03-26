@@ -17,6 +17,19 @@ router.get('/', [auth, roleCheck(['superadmin'])], async (req, res) => {
     }
 });
 
+// @route   GET api/clinics/active
+// @desc    Get all active clinics for public registration
+// @access  Public
+router.get('/active', async (req, res) => {
+    try {
+        const clinics = await Clinic.find({ isActive: true }).select('name _id').sort({ name: 1 });
+        res.json(clinics);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 // @route   POST api/clinics
 // @desc    Create a new clinic
 // @access  Private (Superadmin only)
