@@ -60,6 +60,34 @@ router.get('/me', auth, async (req, res) => {
     }
 });
 
+// @route   PUT api/patients/me
+// @desc    Update current user's patient profile
+// @access  Private
+router.put('/me', auth, async (req, res) => {
+    const { dateOfBirth, gender, address, medicalNotes } = req.body;
+    const patientFields = {};
+    if (dateOfBirth) patientFields.dateOfBirth = dateOfBirth;
+    if (gender) patientFields.gender = gender;
+    if (address) patientFields.address = address;
+    if (medicalNotes) patientFields.medicalNotes = medicalNotes;
+
+    try {
+        let patient = await Patient.findOne({ userId: req.user.id });
+        if (!patient) return res.status(404).json({ msg: 'Patient profile not found' });
+
+        patient = await Patient.findOneAndUpdate(
+            { userId: req.user.id },
+            { $set: patientFields },
+            { new: true }
+        ).populate('userId', 'name email phone');
+
+        res.json(patient);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 // @route   GET api/patients/:id
 // @desc    Get single patient
 // @access  Private

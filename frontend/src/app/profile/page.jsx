@@ -63,17 +63,17 @@ export default function MyProfile() {
 
     return (
         <div className="text-foreground max-w-4xl mx-auto">
-            <Button
+            <button
                 onClick={() => router.push('/dashboard')}
-                className="mb-8 bg-transparent text-gray-400 hover:text-primary pl-0 flex items-center gap-2 font-bold transition-all"
+                className="mb-8 bg-transparent text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary pl-0 flex items-center gap-2 font-bold transition-all group border-none shadow-none cursor-pointer"
             >
-                <div className="p-1.5 bg-gray-100 dark:bg-white/5 rounded-lg group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
+                <div className="p-1.5 bg-gray-100 dark:bg-white/5 rounded-lg group-hover:bg-primary group-hover:text-white transition-all shadow-md">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                 </div>
                 Back to Dashboard
-            </Button>
+            </button>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Sidebar / Profile Card */}
@@ -103,9 +103,9 @@ export default function MyProfile() {
                         <div className="mt-10">
                             <Button
                                 onClick={() => setShowEdit(!showEdit)}
-                                className={`w-full text-sm font-bold py-3.5 shadow-lg transition-all duration-300 rounded-2xl ${showEdit
-                                    ? 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 shadow-none border border-red-100 dark:border-red-500/20'
-                                    : 'bg-primary hover:bg-primary-dark text-white shadow-primary/25'
+                                className={`w-full text-sm font-bold py-3.2 rounded-xl transition-all duration-300 ${showEdit
+                                    ? 'bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-500/20'
+                                    : 'bg-primary hover:bg-primary-dark text-white shadow-lg shadow-primary/25'
                                     }`}
                             >
                                 {showEdit ? 'Cancel Editing' : 'Edit Profile'}

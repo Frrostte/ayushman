@@ -17,7 +17,7 @@ export default function Register() {
         password: '',
         name: '',
         phone: '',
-        role: 'doctor'
+        role: 'patient'
     });
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);

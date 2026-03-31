@@ -30,6 +30,20 @@
   }
 }
 
+/* Calendar Icon Fixes */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px;
+    filter: invert(0);
+    transition: filter 0.2s ease-in-out;
+}
+
+.dark input[type="date"]::-webkit-calendar-picker-indicator,
+html.dark input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) !important;
+}
+
 body {
   color: rgb(var(--foreground));
   background: rgb(var(--background));

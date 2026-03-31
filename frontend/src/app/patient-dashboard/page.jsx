@@ -49,6 +49,11 @@ export default function PatientDashboard() {
                 const res = await api.get('/patients/me');
                 setPatientProfile(res.data);
 
+                // Auto-show profile completion if core fields are missing
+                if (!res.data.dateOfBirth || !res.data.gender || !res.data.address) {
+                    setShowProfileForm(true);
+                }
+
                 // 2. Fetch Appointments (using patient ID from profile)
                 if (res.data._id) {
                     const appRes = await api.get(`/appointments/patient/${res.data._id}`);
@@ -71,16 +76,12 @@ export default function PatientDashboard() {
     const handleProfileSubmit = async (e) => {
         e.preventDefault();
         try {
-            const payload = {
-                ...profileData,
-                userId: user.id
-            };
-            const res = await api.post('/patients', payload);
+            const res = await api.put('/patients/me', profileData);
             setPatientProfile(res.data);
             setShowProfileForm(false);
         } catch (err) {
-            console.error("Error creating profile", err);
-            alert("Failed to create profile");
+            console.error("Error updating profile", err);
+            alert("Failed to update profile");
         }
     };
 
@@ -113,17 +114,16 @@ export default function PatientDashboard() {
                     <p className="text-gray-500 dark:text-gray-400 mb-8">Please provide additional details to continue.</p>
                     <form onSubmit={handleProfileSubmit} className="space-y-6">
                         <Input
-                            label="Date of Birth"
+                            label="Date of Birth*"
                             type="date"
                             name="dateOfBirth"
                             value={profileData.dateOfBirth}
                             onChange={handleChange}
                             required
-                            style={{ colorScheme: 'light dark' }}
-                            className="bg-gray-50 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white focus:ring-primary/20"
+                            max={new Date().toISOString().split('T')[0]}
                         />
                         <Select
-                            label="Gender"
+                            label="Gender*"
                             name="gender"
                             value={profileData.gender}
                             onChange={handleChange}
@@ -132,27 +132,28 @@ export default function PatientDashboard() {
                                 { value: 'female', label: 'Female' },
                                 { value: 'other', label: 'Other' }
                             ]}
-                            className="bg-gray-50 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white"
                         />
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Address</label>
+                            <label className="block text-sm font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Address*</label>
                             <textarea
                                 name="address"
                                 value={profileData.address}
                                 onChange={handleChange}
                                 required
-                                className="appearance-none rounded-xl relative block w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary sm:text-sm transition-all resize-none"
+                                className="appearance-none rounded-xl relative block w-full px-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition-all shadow-sm resize-none"
                                 rows="3"
+                                style={{ colorScheme: 'inherit' }}
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Medical Notes</label>
+                            <label className="block text-sm font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Medical Notes</label>
                             <textarea
                                 name="medicalNotes"
                                 value={profileData.medicalNotes}
                                 onChange={handleChange}
-                                className="appearance-none rounded-xl relative block w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary sm:text-sm transition-all resize-none"
+                                className="appearance-none rounded-xl relative block w-full px-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition-all shadow-sm resize-none"
                                 rows="3"
+                                style={{ colorScheme: 'inherit' }}
                             />
                         </div>
                         <Button type="submit" className="w-full py-3 shadow-lg shadow-primary/20">

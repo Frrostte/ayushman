@@ -100,7 +100,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
                             <h1 className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-light tracking-tighter">
                                 AYUSHMAN
                             </h1>
-                            <p className="text-[10px] text-gray-400 dark:text-gray-500 tracking-[0.2em] mt-1 font-bold">CLINIC MaNaGeMeNT</p>
+                            <p className="text-[10px] text-gray-400 dark:text-gray-500 tracking-[0.2em] mt-1 font-bold">CLINIC MANAGEMENT</p>
                         </div>
                     )}
                     <button

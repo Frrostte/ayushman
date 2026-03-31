@@ -8,7 +8,8 @@ export default function Select({ label, options = [], className = '', ...props }
             )}
             <div className="relative">
                 <select
-                    className={`appearance-none rounded-xl relative block w-full px-4 py-3 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition-all shadow-sm ${props.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`appearance-none rounded-xl relative block w-full px-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition-all shadow-sm ${props.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    style={{ colorScheme: 'inherit', ...props.style }}
                     {...props}
                 >
                     {options.map((opt) => (

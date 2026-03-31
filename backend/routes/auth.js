@@ -10,12 +10,8 @@ const auth = require('../middleware/auth');
 // @desc    Register user
 // @access  Public
 router.post('/register', async (req, res) => {
-    let { email, password, name, phone, role, clinicId } = req.body;
-
-    // For public registration (e.g. patients), they must select a clinicId on frontend
-    if (!clinicId && role !== 'superadmin') {
-        return res.status(400).json({ msg: 'Clinic ID is required' });
-    }
+    let { email, password, name, phone, clinicId } = req.body;
+    const role = 'patient'; // Force public registration to be patient only
 
     try {
         let user = await User.findOne({ email });
@@ -37,6 +33,23 @@ router.post('/register', async (req, res) => {
         user.password = await bcrypt.hash(password, salt);
 
         await user.save();
+
+        // Auto-create associated role profile
+        if (role === 'patient') {
+            const Patient = require('../models/Patient');
+            const newPatient = new Patient({
+                userId: user.id,
+                clinicId: user.clinicId || null
+            });
+            await newPatient.save();
+        } else if (role === 'doctor') {
+            const Doctor = require('../models/Doctor');
+            const newDoctor = new Doctor({
+                userId: user.id,
+                clinicId: user.clinicId || null
+            });
+            await newDoctor.save();
+        }
 
         const payload = {
             user: {
@@ -71,10 +84,6 @@ router.post('/admin/register', [auth, roleCheck(['admin', 'superadmin'])], async
     // If an admin is creating the user, automatically assign to their clinic
     if (!clinicId && req.user.clinicId) {
         clinicId = req.user.clinicId;
-    }
-
-    if (!clinicId && role !== 'superadmin') {
-        return res.status(400).json({ msg: 'Clinic ID is required' });
     }
 
     try {

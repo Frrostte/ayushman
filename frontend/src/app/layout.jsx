@@ -11,7 +11,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
             <body className={`${inter.variable} font-sans bg-background text-foreground min-h-screen antialiased`}>
                 <ThemeProvider>
                     <LayoutWrapper>

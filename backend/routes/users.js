@@ -73,9 +73,17 @@ router.put('/:id', [auth, roleCheck(['admin', 'superadmin'])], async (req, res) 
         if (req.user.role === 'superadmin' && req.body.clinicId !== undefined) {
             const newClinicId = req.body.clinicId || null;
             if (user.role === 'patient') {
-                await require('../models/Patient').findOneAndUpdate({ userId: user.id }, { clinicId: newClinicId });
+                await require('../models/Patient').findOneAndUpdate(
+                    { userId: user.id }, 
+                    { clinicId: newClinicId }, 
+                    { upsert: true, new: true, setDefaultsOnInsert: true }
+                );
             } else if (user.role === 'doctor') {
-                await require('../models/Doctor').findOneAndUpdate({ userId: user.id }, { clinicId: newClinicId });
+                await require('../models/Doctor').findOneAndUpdate(
+                    { userId: user.id }, 
+                    { clinicId: newClinicId }, 
+                    { upsert: true, new: true, setDefaultsOnInsert: true }
+                );
             }
         }
 

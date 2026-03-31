@@ -28,11 +28,11 @@ router.get('/me', [auth, roleCheck(['doctor'])], async (req, res) => {
             return res.status(404).json({ msg: 'Doctor profile not found' });
         }
 
-        const doctorProfile = await Doctor.findOne({ userId: req.user.id, clinicId: req.user.clinicId });
+        const doctorProfile = await Doctor.findOne({ userId: req.user.id });
 
         const doctorData = {
-            ...user.toObject(),
-            ...doctorProfile?.toObject()
+            ...doctorProfile?.toObject(),
+            ...user.toObject()
         };
 
         res.json(doctorData);
@@ -52,12 +52,12 @@ router.get('/:id', [auth, roleCheck(['admin', 'doctor', 'patient'])], async (req
             return res.status(404).json({ msg: 'Doctor not found' });
         }
 
-        const doctorProfile = await Doctor.findOne({ userId: req.params.id, clinicId: req.user.clinicId });
+        const doctorProfile = await Doctor.findOne({ userId: req.params.id });
 
         // Merge user and doctor profile
         const doctorData = {
-            ...user.toObject(),
-            ...doctorProfile?.toObject()
+            ...doctorProfile?.toObject(),
+            ...user.toObject()
         };
 
         res.json(doctorData);
@@ -81,7 +81,12 @@ router.put('/:id', [auth, roleCheck(['admin', 'doctor'])], async (req, res) => {
 
     try {
         let user = await User.findById(req.params.id);
-        if (!user || user.role !== 'doctor') {
+        if (!user) {
+            console.log(`[DEBUG] PUT /doctors/:id - User not found for ID: ${req.params.id}`);
+            return res.status(404).json({ msg: 'Doctor not found' });
+        }
+        if (user.role !== 'doctor') {
+            console.log(`[DEBUG] PUT /doctors/:id - User ${user.email} has role ${user.role}, expected doctor`);
             return res.status(404).json({ msg: 'Doctor not found' });
         }
 
@@ -106,7 +111,7 @@ router.put('/:id', [auth, roleCheck(['admin', 'doctor'])], async (req, res) => {
         if (experience) doctorFields.experience = experience;
         if (qualifications) doctorFields.qualifications = qualifications;
 
-        let doctor = await Doctor.findOne({ userId: req.params.id, clinicId: req.user.clinicId });
+        let doctor = await Doctor.findOne({ userId: req.params.id });
         if (!doctor) {
             // Create if not exists (though unlikely for existing doctor)
             doctor = new Doctor({ userId: req.params.id, clinicId: req.user.clinicId, availability: [], ...doctorFields });
