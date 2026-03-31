@@ -50,6 +50,9 @@ router.put('/:id', [auth, roleCheck(['admin', 'superadmin'])], async (req, res) 
         if (phone) userFields.phone = phone;
         if (role) userFields.role = role;
         if (req.body.isActive !== undefined) userFields.isActive = req.body.isActive;
+        if (req.body.clinicId !== undefined && req.user.role === 'superadmin') {
+            userFields.clinicId = req.body.clinicId || null;
+        }
 
         // Optionally update password if provided by admin
         if (password) {
@@ -66,6 +69,15 @@ router.put('/:id', [auth, roleCheck(['admin', 'superadmin'])], async (req, res) 
             { $set: userFields },
             { new: true }
         ).select('-password');
+
+        if (req.user.role === 'superadmin' && req.body.clinicId !== undefined) {
+            const newClinicId = req.body.clinicId || null;
+            if (user.role === 'patient') {
+                await require('../models/Patient').findOneAndUpdate({ userId: user.id }, { clinicId: newClinicId });
+            } else if (user.role === 'doctor') {
+                await require('../models/Doctor').findOneAndUpdate({ userId: user.id }, { clinicId: newClinicId });
+            }
+        }
 
         res.json(user);
     } catch (err) {

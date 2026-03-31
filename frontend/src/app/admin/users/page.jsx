@@ -24,7 +24,7 @@ export default function UsersList() {
     const [editingUser, setEditingUser] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editFormData, setEditFormData] = useState({
-        name: '', email: '', phone: '', role: '', password: ''
+        name: '', email: '', phone: '', role: '', password: '', clinicId: ''
     });
     const [editError, setEditError] = useState('');
     const [isSaving, setIsSaving] = useState(false);
@@ -81,6 +81,7 @@ export default function UsersList() {
             email: user.email || '',
             phone: user.phone || '',
             role: user.role || 'patient',
+            clinicId: user.clinicId?._id || '',
             password: '' // Keep empty, only send if changing
         });
         setEditError('');
@@ -382,10 +383,10 @@ export default function UsersList() {
 
             {/* Edit User Modal */}
             {isEditModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsEditModalOpen(false)} />
-                    <Card className="relative w-full max-w-2xl bg-white dark:bg-surface shadow-2xl rounded-3xl overflow-hidden animate-slide-up">
-                        <div className="px-8 py-6 border-b border-gray-100 dark:border-white/5 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
+                    <Card className="relative w-full max-w-2xl bg-white dark:bg-surface shadow-2xl rounded-3xl overflow-hidden animate-slide-up flex flex-col max-h-[90vh]">
+                        <div className="px-8 py-6 border-b border-gray-100 dark:border-white/5 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02] shrink-0">
                             <div>
                                 <h3 className="text-xl font-black text-gray-900 dark:text-white">Edit User details</h3>
                                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Updating profile for {editingUser?.name}</p>
@@ -400,86 +401,100 @@ export default function UsersList() {
                             </button>
                         </div>
 
-                        <form onSubmit={handleEditSubmit} className="p-8">
-                            {editError && (
-                                <div className="mb-6 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/50 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm font-bold">
-                                    {editError}
-                                </div>
-                            )}
+                        <div className="overflow-y-auto w-full">
+                            <form onSubmit={handleEditSubmit} className="p-8">
+                                {editError && (
+                                    <div className="mb-6 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/50 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm font-bold">
+                                        {editError}
+                                    </div>
+                                )}
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <Input
-                                    label="Full Name*"
-                                    name="name"
-                                    value={editFormData.name}
-                                    onChange={handleEditChange}
-                                    required
-                                />
-                                <Input
-                                    label="Email Address*"
-                                    type="email"
-                                    name="email"
-                                    value={editFormData.email}
-                                    onChange={handleEditChange}
-                                    required
-                                />
-                                <Input
-                                    label="Phone Number*"
-                                    name="phone"
-                                    value={editFormData.phone}
-                                    onChange={handleEditChange}
-                                    required
-                                />
-                                <Select
-                                    label="Role"
-                                    name="role"
-                                    value={editFormData.role}
-                                    onChange={handleEditChange}
-                                    options={[
-                                        { value: 'doctor', label: 'Doctor' },
-                                        { value: 'admin', label: 'Administrator' },
-                                        { value: 'patient', label: 'Patient' }
-                                    ]}
-                                />
-                                <div className="md:col-span-2">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <Input
-                                        label="New Password (Optional)"
-                                        type="password"
-                                        name="password"
-                                        value={editFormData.password}
+                                        label="Full Name*"
+                                        name="name"
+                                        value={editFormData.name}
                                         onChange={handleEditChange}
-                                        placeholder="Leave blank to keep current password"
+                                        required
                                     />
-                                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium ml-1">
-                                        Only enter a password if you wish to overwrite the users current login credentials.
-                                    </p>
+                                    <Input
+                                        label="Email Address*"
+                                        type="email"
+                                        name="email"
+                                        value={editFormData.email}
+                                        onChange={handleEditChange}
+                                        required
+                                    />
+                                    <Input
+                                        label="Phone Number*"
+                                        name="phone"
+                                        value={editFormData.phone}
+                                        onChange={handleEditChange}
+                                        required
+                                    />
+                                    <Select
+                                        label="Role"
+                                        name="role"
+                                        value={editFormData.role}
+                                        onChange={handleEditChange}
+                                        options={[
+                                            { value: 'doctor', label: 'Doctor' },
+                                            { value: 'admin', label: 'Administrator' },
+                                            { value: 'patient', label: 'Patient' }
+                                        ]}
+                                    />
+                                    {currentUser?.role === 'superadmin' && editFormData.role !== 'superadmin' && (
+                                        <Select
+                                            label="Assign to Clinic"
+                                            name="clinicId"
+                                            value={editFormData.clinicId}
+                                            onChange={handleEditChange}
+                                            options={[
+                                                { value: '', label: 'System Level (Unassigned)' },
+                                                ...clinics.map(c => ({ value: c._id, label: c.name }))
+                                            ]}
+                                        />
+                                    )}
+                                    <div className="md:col-span-2">
+                                        <Input
+                                            label="New Password (Optional)"
+                                            type="password"
+                                            name="password"
+                                            value={editFormData.password}
+                                            onChange={handleEditChange}
+                                            placeholder="Leave blank to keep current password"
+                                        />
+                                        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium ml-1">
+                                            Only enter a password if you wish to overwrite the users current login credentials.
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="mt-8 flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-white/5">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsEditModalOpen(false)}
-                                    className="px-4 py-3 w-full flex justify-center text-sm rounded-lg font-bold bg-red-500 hover:bg-red-600 text-white transition-all shadow-[0_0_20px_-5px_rgba(239,68,68,0.5)] items-center"
-                                >
-                                    Cancel
-                                </button>
-                                <Button
-                                    type="submit"
-                                    isLoading={isSaving}
-                                    className="px-8 shadow-[0_0_20px_-5px_rgba(124,58,237,0.5)] text-sm"
-                                >
-                                    Save Changes
-                                </Button>
-                            </div>
-                        </form>
+                                <div className="mt-8 flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-white/5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsEditModalOpen(false)}
+                                        className="px-4 py-3 w-full flex justify-center text-sm rounded-lg font-bold bg-red-500 hover:bg-red-600 text-white transition-all shadow-[0_0_20px_-5px_rgba(239,68,68,0.5)] items-center"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <Button
+                                        type="submit"
+                                        isLoading={isSaving}
+                                        className="px-8 shadow-[0_0_20px_-5px_rgba(124,58,237,0.5)] text-sm"
+                                    >
+                                        Save Changes
+                                    </Button>
+                                </div>
+                            </form>
+                        </div>
                     </Card>
                 </div>
             )}
 
             {/* Delete Confirmation Modal */}
             {isDeleteModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isDeleting && setIsDeleteModalOpen(false)} />
                     <Card className="relative w-full max-w-md bg-white dark:bg-surface shadow-2xl rounded-3xl overflow-hidden animate-slide-up p-8 text-center">
                         <div className="mx-auto w-16 h-16 bg-red-50 dark:bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mb-6 border border-red-100 dark:border-red-500/20">
