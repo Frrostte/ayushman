@@ -47,12 +47,22 @@ router.get('/me', [auth, roleCheck(['doctor'])], async (req, res) => {
 // @access  Private (Admin, Doctor, Patient)
 router.get('/:id', [auth, roleCheck(['admin', 'doctor', 'patient'])], async (req, res) => {
     try {
-        const user = await User.findById(req.params.id).select('-password');
-        if (!user || user.role !== 'doctor') {
-            return res.status(404).json({ msg: 'Doctor not found' });
+        // Enforce clinic boundaries
+        const query = { _id: req.params.id, role: 'doctor' };
+        if (req.user.role !== 'superadmin') {
+            query.clinicId = req.user.clinicId;
         }
 
-        const doctorProfile = await Doctor.findOne({ userId: req.params.id });
+        const user = await User.findOne(query).select('-password');
+        if (!user) {
+            return res.status(404).json({ msg: 'Doctor not found or unauthorized' });
+        }
+
+        const profileQuery = { userId: req.params.id };
+        if (req.user.role !== 'superadmin') {
+            profileQuery.clinicId = req.user.clinicId;
+        }
+        const doctorProfile = await Doctor.findOne(profileQuery);
 
         // Merge user and doctor profile
         const doctorData = {
@@ -80,14 +90,15 @@ router.put('/:id', [auth, roleCheck(['admin', 'doctor'])], async (req, res) => {
     } = req.body;
 
     try {
-        let user = await User.findById(req.params.id);
-        if (!user) {
-            console.log(`[DEBUG] PUT /doctors/:id - User not found for ID: ${req.params.id}`);
-            return res.status(404).json({ msg: 'Doctor not found' });
+        const query = { _id: req.params.id, role: 'doctor' };
+        if (req.user.role !== 'superadmin') {
+            query.clinicId = req.user.clinicId;
         }
-        if (user.role !== 'doctor') {
-            console.log(`[DEBUG] PUT /doctors/:id - User ${user.email} has role ${user.role}, expected doctor`);
-            return res.status(404).json({ msg: 'Doctor not found' });
+
+        let user = await User.findOne(query);
+        if (!user) {
+            console.log(`[DEBUG] PUT /doctors/:id - User not found or unauthorized for ID: ${req.params.id}`);
+            return res.status(404).json({ msg: 'Doctor not found or unauthorized' });
         }
 
         // Check permission: Admin or same user
@@ -111,7 +122,12 @@ router.put('/:id', [auth, roleCheck(['admin', 'doctor'])], async (req, res) => {
         if (experience) doctorFields.experience = experience;
         if (qualifications) doctorFields.qualifications = qualifications;
 
-        let doctor = await Doctor.findOne({ userId: req.params.id });
+        const profileQuery = { userId: req.params.id };
+        if (req.user.role !== 'superadmin') {
+            profileQuery.clinicId = req.user.clinicId;
+        }
+        
+        let doctor = await Doctor.findOne(profileQuery);
         if (!doctor) {
             // Create if not exists (though unlikely for existing doctor)
             doctor = new Doctor({ userId: req.params.id, clinicId: req.user.clinicId, availability: [], ...doctorFields });

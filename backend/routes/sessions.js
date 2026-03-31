@@ -68,12 +68,16 @@ router.post('/', auth, async (req, res) => {
     } = req.body;
 
     try {
-        // Fetch appointment to get patientId and verify it exists
+        // Fetch appointment to get patientId and verify it exists within the same clinic
         const Appointment = require('../models/Appointment');
-        const appointment = await Appointment.findById(appointmentId);
+        const query = { _id: appointmentId };
+        if (req.user.role !== 'superadmin') {
+            query.clinicId = req.user.clinicId;
+        }
+        const appointment = await Appointment.findOne(query);
         
         if (!appointment) {
-            return res.status(404).json({ msg: 'Appointment not found' });
+            return res.status(404).json({ msg: 'Appointment not found or unauthorized' });
         }
 
         const newSession = new Session({

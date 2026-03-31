@@ -110,6 +110,16 @@ router.post('/', auth, async (req, res) => {
     const { userId, dateOfBirth, gender, address, medicalNotes } = req.body;
 
     try {
+        const User = require('../models/User');
+        const query = { _id: userId };
+        if (req.user.role !== 'superadmin') {
+            query.clinicId = req.user.clinicId;
+        }
+        const user = await User.findOne(query);
+        if (!user) {
+            return res.status(403).json({ msg: 'Unauthorized: User does not belong to your clinic' });
+        }
+
         const newPatient = new Patient({
             userId,
             clinicId: req.user.clinicId,

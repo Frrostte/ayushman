@@ -81,8 +81,10 @@ const roleCheck = require('../middleware/roleCheck');
 router.post('/admin/register', [auth, roleCheck(['admin', 'superadmin'])], async (req, res) => {
     let { email, password, name, phone, role, clinicId } = req.body;
 
-    // If an admin is creating the user, automatically assign to their clinic
-    if (!clinicId && req.user.clinicId) {
+    // Enforce clinic boundary: admins cannot provision users outside their clinic
+    if (req.user.role !== 'superadmin') {
+        clinicId = req.user.clinicId;
+    } else if (!clinicId && req.user.clinicId) {
         clinicId = req.user.clinicId;
     }
 

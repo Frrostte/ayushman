@@ -13,12 +13,21 @@ router.get('/slots', auth, async (req, res) => {
     const { doctorId, date } = req.query; // date in YYYY-MM-DD format
 
     try {
-        const doctor = await User.findById(doctorId);
-        if (!doctor || doctor.role !== 'doctor') {
-            return res.status(404).json({ msg: 'Doctor not found' });
+        const query = { _id: doctorId, role: 'doctor' };
+        if (req.user.role !== 'superadmin') {
+            query.clinicId = req.user.clinicId;
         }
 
-        const doctorProfile = await Doctor.findOne({ userId: doctorId });
+        const doctor = await User.findOne(query);
+        if (!doctor) {
+            return res.status(404).json({ msg: 'Doctor not found or unauthorized' });
+        }
+
+        const profileQuery = { userId: doctorId };
+        if (req.user.role !== 'superadmin') {
+            profileQuery.clinicId = req.user.clinicId;
+        }
+        const doctorProfile = await Doctor.findOne(profileQuery);
 
         if (!doctorProfile || !doctorProfile.availability || doctorProfile.availability.length === 0) {
             return res.json([]);
@@ -166,6 +175,20 @@ router.post('/', auth, async (req, res) => {
     const { patientId, doctorId, date, time } = req.body;
 
     try {
+        const Patient = require('../models/Patient');
+        
+        // 1. Cross-Tenant Validation: Ensure patient belongs to the caller's clinic
+        const patient = await Patient.findOne({ _id: patientId, clinicId: req.user.clinicId });
+        if (!patient) {
+            return res.status(403).json({ msg: 'Unauthorized: Patient does not belong to your clinic' });
+        }
+
+        // 2. Cross-Tenant Validation: Ensure doctor belongs to the caller's clinic
+        const doctor = await User.findOne({ _id: doctorId, clinicId: req.user.clinicId, role: 'doctor' });
+        if (!doctor) {
+            return res.status(403).json({ msg: 'Unauthorized: Doctor does not belong to your clinic' });
+        }
+
         const newAppointment = new Appointment({
             patientId,
             clinicId: req.user.clinicId,
