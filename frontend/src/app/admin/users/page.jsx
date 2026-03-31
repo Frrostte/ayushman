@@ -8,6 +8,7 @@ import Card from '../../../components/Card';
 import Button from '../../../components/Button';
 import Input from '../../../components/Input';
 import Select from '../../../components/Select';
+import Portal from '../../../components/Portal';
 
 export default function UsersList() {
     const router = useRouter();
@@ -28,6 +29,10 @@ export default function UsersList() {
     });
     const [editError, setEditError] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+
+    // Success Modal State
+    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
     // Delete Modal State
     const [userToDelete, setUserToDelete] = useState(null);
@@ -125,7 +130,10 @@ export default function UsersList() {
 
     const toggleUserStatus = async (user) => {
         try {
-            await api.put(`/users/${user._id}`, { isActive: !user.isActive });
+            const newStatus = !user.isActive;
+            await api.put(`/users/${user._id}`, { isActive: newStatus });
+            setSuccessMessage(`${user.name} has been ${newStatus ? 'activated' : 'deactivated'} successfully.`);
+            setIsSuccessModalOpen(true);
             fetchUsers();
         } catch (err) {
             console.error('Failed to toggle status', err);
@@ -157,7 +165,7 @@ export default function UsersList() {
 
     useEffect(() => {
         let result = users;
-        
+
         if (appliedFilters.clinicId === 'system') {
             result = result.filter(u => !u.clinicId);
         } else if (appliedFilters.clinicId) {
@@ -242,9 +250,9 @@ export default function UsersList() {
                                     ]}
                                 />
                             </div>
-                            <Button 
+                            <Button
                                 onClick={() => setAppliedFilters(filters)}
-                                className="w-full md:w-auto px-8 shadow-xl shadow-primary/20 h-[52px]" 
+                                className="w-full md:w-auto px-8 shadow-xl shadow-primary/20 h-[52px]"
                             >
                                 <span className="flex items-center gap-2">
                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -318,11 +326,10 @@ export default function UsersList() {
                                             {u._id !== currentUser?.id && (
                                                 <button
                                                     onClick={() => toggleUserStatus(u)}
-                                                    className={`p-2 rounded-xl transition-all ${
-                                                        u.isActive === false 
-                                                        ? 'text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10' 
+                                                    className={`p-2 rounded-xl transition-all ${u.isActive === false
+                                                        ? 'text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'
                                                         : 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10'
-                                                    }`}
+                                                        }`}
                                                     title={u.isActive === false ? 'Activate User' : 'Deactivate User'}
                                                 >
                                                     {u.isActive === false ? (
@@ -383,158 +390,188 @@ export default function UsersList() {
 
             {/* Edit User Modal */}
             {isEditModalOpen && (
-                <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsEditModalOpen(false)} />
-                    <Card className="relative w-full max-w-2xl bg-white dark:bg-surface shadow-2xl rounded-3xl overflow-hidden animate-slide-up flex flex-col max-h-[90vh]">
-                        <div className="px-8 py-6 border-b border-gray-100 dark:border-white/5 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02] shrink-0">
-                            <div>
-                                <h3 className="text-xl font-black text-gray-900 dark:text-white">Edit User details</h3>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Updating profile for {editingUser?.name}</p>
+                <Portal>
+                    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsEditModalOpen(false)} />
+                        <Card className="relative w-full max-w-2xl bg-white dark:bg-surface shadow-[0_0_100px_-10px_rgba(0,0,0,0.5)] rounded-3xl overflow-hidden animate-slide-up flex flex-col max-h-[90vh] border border-white/5">
+                            <div className="px-8 py-6 border-b border-gray-100 dark:border-white/5 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02] shrink-0">
+                                <div>
+                                    <h3 className="text-xl font-black text-gray-900 dark:text-white">Edit User details</h3>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Updating profile for {editingUser?.name}</p>
+                                </div>
+                                <button
+                                    onClick={() => setIsEditModalOpen(false)}
+                                    className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl transition-all"
+                                >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
                             </div>
-                            <button
-                                onClick={() => setIsEditModalOpen(false)}
-                                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl transition-all"
-                            >
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
 
-                        <div className="overflow-y-auto w-full">
-                            <form onSubmit={handleEditSubmit} className="p-8">
-                                {editError && (
-                                    <div className="mb-6 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/50 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm font-bold">
-                                        {editError}
-                                    </div>
-                                )}
+                            <div className="overflow-y-auto w-full">
+                                <form onSubmit={handleEditSubmit} className="p-8">
+                                    {editError && (
+                                        <div className="mb-6 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/50 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm font-bold">
+                                            {editError}
+                                        </div>
+                                    )}
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <Input
-                                        label="Full Name*"
-                                        name="name"
-                                        value={editFormData.name}
-                                        onChange={handleEditChange}
-                                        required
-                                    />
-                                    <Input
-                                        label="Email Address*"
-                                        type="email"
-                                        name="email"
-                                        value={editFormData.email}
-                                        onChange={handleEditChange}
-                                        required
-                                    />
-                                    <Input
-                                        label="Phone Number*"
-                                        name="phone"
-                                        value={editFormData.phone}
-                                        onChange={handleEditChange}
-                                        required
-                                    />
-                                    <Select
-                                        label="Role"
-                                        name="role"
-                                        value={editFormData.role}
-                                        onChange={handleEditChange}
-                                        options={[
-                                            { value: 'doctor', label: 'Doctor' },
-                                            { value: 'admin', label: 'Administrator' },
-                                            { value: 'patient', label: 'Patient' }
-                                        ]}
-                                    />
-                                    {currentUser?.role === 'superadmin' && editFormData.role !== 'superadmin' && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Input
+                                            label="Full Name*"
+                                            name="name"
+                                            value={editFormData.name}
+                                            onChange={handleEditChange}
+                                            required
+                                        />
+                                        <Input
+                                            label="Email Address*"
+                                            type="email"
+                                            name="email"
+                                            value={editFormData.email}
+                                            onChange={handleEditChange}
+                                            required
+                                        />
+                                        <Input
+                                            label="Phone Number*"
+                                            name="phone"
+                                            value={editFormData.phone}
+                                            onChange={handleEditChange}
+                                            required
+                                        />
                                         <Select
-                                            label="Assign to Clinic"
-                                            name="clinicId"
-                                            value={editFormData.clinicId}
+                                            label="Role"
+                                            name="role"
+                                            value={editFormData.role}
                                             onChange={handleEditChange}
                                             options={[
-                                                { value: '', label: 'System Level (Unassigned)' },
-                                                ...clinics.map(c => ({ value: c._id, label: c.name }))
+                                                { value: 'doctor', label: 'Doctor' },
+                                                { value: 'admin', label: 'Administrator' },
+                                                { value: 'patient', label: 'Patient' }
                                             ]}
                                         />
-                                    )}
-                                    <div className="md:col-span-2">
-                                        <Input
-                                            label="New Password (Optional)"
-                                            type="password"
-                                            name="password"
-                                            value={editFormData.password}
-                                            onChange={handleEditChange}
-                                            placeholder="Leave blank to keep current password"
-                                        />
-                                        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium ml-1">
-                                            Only enter a password if you wish to overwrite the users current login credentials.
-                                        </p>
+                                        {currentUser?.role === 'superadmin' && editFormData.role !== 'superadmin' && (
+                                            <Select
+                                                label="Assign to Clinic"
+                                                name="clinicId"
+                                                value={editFormData.clinicId}
+                                                onChange={handleEditChange}
+                                                options={[
+                                                    { value: '', label: 'System Level (Unassigned)' },
+                                                    ...clinics.map(c => ({ value: c._id, label: c.name }))
+                                                ]}
+                                            />
+                                        )}
+                                        <div className="md:col-span-2">
+                                            <Input
+                                                label="New Password (Optional)"
+                                                type="password"
+                                                name="password"
+                                                value={editFormData.password}
+                                                onChange={handleEditChange}
+                                                placeholder="Leave blank to keep current password"
+                                            />
+                                            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium ml-1">
+                                                Only enter a password if you wish to overwrite the users current login credentials.
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div className="mt-8 flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-white/5">
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsEditModalOpen(false)}
-                                        className="px-4 py-3 w-full flex justify-center text-sm rounded-lg font-bold bg-red-500 hover:bg-red-600 text-white transition-all shadow-[0_0_20px_-5px_rgba(239,68,68,0.5)] items-center"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <Button
-                                        type="submit"
-                                        isLoading={isSaving}
-                                        className="px-8 shadow-[0_0_20px_-5px_rgba(124,58,237,0.5)] text-sm"
-                                    >
-                                        Save Changes
-                                    </Button>
-                                </div>
-                            </form>
-                        </div>
-                    </Card>
-                </div>
+                                    <div className="mt-8 flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-white/5">
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsEditModalOpen(false)}
+                                            className="px-4 py-3 w-full flex justify-center text-sm rounded-lg font-bold bg-red-500 hover:bg-red-600 text-white transition-all shadow-[0_0_20px_-5px_rgba(239,68,68,0.5)] items-center"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <Button
+                                            type="submit"
+                                            isLoading={isSaving}
+                                            className="px-8 shadow-[0_0_20px_-5px_rgba(124,58,237,0.5)] text-sm"
+                                        >
+                                            Save Changes
+                                        </Button>
+                                    </div>
+                                </form>
+                            </div>
+                        </Card>
+                    </div>
+                </Portal>
             )}
 
             {/* Delete Confirmation Modal */}
             {isDeleteModalOpen && (
-                <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isDeleting && setIsDeleteModalOpen(false)} />
-                    <Card className="relative w-full max-w-md bg-white dark:bg-surface shadow-2xl rounded-3xl overflow-hidden animate-slide-up p-8 text-center">
-                        <div className="mx-auto w-16 h-16 bg-red-50 dark:bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mb-6 border border-red-100 dark:border-red-500/20">
-                            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                        </div>
-                        
-                        <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-2">Delete User?</h3>
-                        <p className="text-gray-500 dark:text-gray-400 font-medium mb-8">
-                            Are you sure you want to permanently delete <span className="text-gray-900 dark:text-white font-bold">{userToDelete?.name}</span>? This will also wipe out any associated clinical profiles permanently. This action cannot be undone.
-                        </p>
+                <Portal>
+                    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isDeleting && setIsDeleteModalOpen(false)} />
+                        <Card className="relative w-full max-w-md bg-white dark:bg-surface shadow-[0_0_100px_-10px_rgba(0,0,0,0.5)] rounded-3xl overflow-hidden animate-slide-up p-8 text-center border border-white/5">
+                            <div className="mx-auto w-16 h-16 bg-red-50 dark:bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mb-6 border border-red-100 dark:border-red-500/20">
+                                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
 
-                        <div className="flex gap-4">
-                            <button
-                                type="button"
-                                onClick={() => setIsDeleteModalOpen(false)}
-                                disabled={isDeleting}
-                                className="flex-1 px-4 py-3 text-sm rounded-xl font-bold bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 transition-colors disabled:opacity-50"
+                            <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-2">Delete User?</h3>
+                            <p className="text-gray-500 dark:text-gray-400 font-medium mb-8">
+                                Are you sure you want to permanently delete <span className="text-gray-900 dark:text-white font-bold">{userToDelete?.name}</span>? This will also wipe out any associated clinical profiles permanently. This action cannot be undone.
+                            </p>
+
+                            <div className="flex gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsDeleteModalOpen(false)}
+                                    disabled={isDeleting}
+                                    className="flex-1 px-4 py-3 text-sm rounded-xl font-bold bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 transition-colors disabled:opacity-50"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={confirmDeleteUser}
+                                    disabled={isDeleting}
+                                    className="flex-1 px-4 py-3 text-sm rounded-xl font-bold bg-red-500 hover:bg-red-600 text-white transition-all shadow-[0_0_20px_-5px_rgba(239,68,68,0.5)] flex items-center justify-center gap-2 disabled:opacity-50"
+                                >
+                                    {isDeleting ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/20 border-t-white"></div>
+                                            Deleting...
+                                        </>
+                                    ) : (
+                                        'Yes, Delete'
+                                    )}
+                                </button>
+                            </div>
+                        </Card>
+                    </div>
+                </Portal>
+            )}
+
+            {/* Success Modal */}
+            {isSuccessModalOpen && (
+                <Portal>
+                    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsSuccessModalOpen(false)} />
+                        <Card className="relative w-full max-w-sm bg-white dark:bg-surface shadow-[0_0_100px_-10px_rgba(0,0,0,0.5)] rounded-3xl overflow-hidden animate-slide-up p-8 text-center border border-emerald-500/20">
+                            <div className="mx-auto w-16 h-16 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mb-6 border border-emerald-100 dark:border-emerald-500/20">
+                                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-2">Success!</h3>
+                            <p className="text-gray-500 dark:text-gray-400 font-medium mb-8">
+                                {successMessage}
+                            </p>
+                            <Button
+                                onClick={() => setIsSuccessModalOpen(false)}
+                                className="w-full py-4 shadow-xl shadow-emerald-500/10"
                             >
-                                Cancel
-                            </button>
-                            <button
-                                type="button"
-                                onClick={confirmDeleteUser}
-                                disabled={isDeleting}
-                                className="flex-1 px-4 py-3 text-sm rounded-xl font-bold bg-red-500 hover:bg-red-600 text-white transition-all shadow-[0_0_20px_-5px_rgba(239,68,68,0.5)] flex items-center justify-center gap-2 disabled:opacity-50"
-                            >
-                                {isDeleting ? (
-                                    <>
-                                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/20 border-t-white"></div>
-                                        Deleting...
-                                    </>
-                                ) : (
-                                    'Yes, Delete'
-                                )}
-                            </button>
-                        </div>
-                    </Card>
-                </div>
+                                Got it
+                            </Button>
+                        </Card>
+                    </div>
+                </Portal>
             )}
         </div>
     );
